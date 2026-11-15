@@ -21,9 +21,9 @@
 :root{
   --bg:#000000; --bg2:#070707; --panel:#0D0D0D; --line:#1F1F1F; --track:#1A1A1A; --fg:#FFFFFF; --muted:#8C8C8C;
   --accent:#FFFFFF; --accent-dim:rgba(255,255,255,.07); --accent-strong:#FFFFFF;
-  --good:#FFFFFF; --good-dim:rgba(255,255,255,.08);
-  --warn:#BDBDBD; --warn-dim:rgba(255,255,255,.06);
-  --bad:#FFFFFF; --bad-dim:rgba(255,255,255,.12);
+  --good:#22C55E; --good-dim:rgba(34,197,94,.14);
+  --warn:#F5A524; --warn-dim:rgba(245,165,36,.14);
+  --bad:#F04438; --bad-dim:rgba(240,68,56,.16);
   --f-display:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:dark;
@@ -220,19 +220,20 @@ section[id]{scroll-margin-top:16px}
   .jvp{z-index:60}
 }
 
-/* Blanco y negro: estados por contraste, no por color */
-.pill.good{background:transparent;color:#fff;border:1px solid #3A3A3A}
-.pill.warn{background:#1C1C1C;color:#CFCFCF}
-.pill.bad{background:#fff;color:#000}
+/* Blanco y negro de base; el color queda solo para progreso y estados */
+.pill.good{background:var(--good-dim);color:var(--good);border:1px solid rgba(34,197,94,.35)}
+.pill.warn{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(245,165,36,.35)}
+.pill.bad{background:var(--bad-dim);color:var(--bad);border:1px solid rgba(240,68,56,.45)}
 .pill.neutral{background:#141414;color:var(--muted)}
-.bar.warn i{background:#9A9A9A} .bar.bad i{background:#fff}
-.fin.soon .d{border-color:#4A4A4A;background:#141414}
-.fin.now .d{border-color:#fff;background:#fff;color:#000}
-.fin.now .d span{color:#000}
+.bar.good i{background:var(--good)} .bar.warn i{background:var(--warn)} .bar.bad i{background:var(--bad)}
+.fin.soon .d{border-color:rgba(245,165,36,.55);background:var(--warn-dim)}
+.fin.soon .d b{color:var(--warn)}
+.fin.now .d{border-color:rgba(240,68,56,.7);background:var(--bad-dim)}
+.fin.now .d b{color:var(--bad)}
 .fin .fnote{color:#CFCFCF}
-.alerts li::before{background:#fff}
-.sl li.warn::before{background:#7A7A7A}
-.sl li.bad::before{background:transparent;border:1.5px solid #fff}
+.mp.good{color:var(--good)} .mp.warn{color:var(--warn)} .mp.bad{color:var(--bad)}
+.ring .pct.good{color:var(--good)} .ring .pct.warn{color:var(--warn)} .ring .pct.bad{color:var(--bad)}
+.hab .n.warn{color:var(--warn)} .hab .n.bad{color:var(--bad)}
 .sl.mental li::before{border-radius:50%;transform:none;border:1.5px solid #7A7A7A;background:transparent}
 .jv-orb{border-color:#fff;background:radial-gradient(circle,#fff 0 26%,rgba(255,255,255,.18) 27% 58%,transparent 59%);box-shadow:0 0 14px rgba(255,255,255,.25)}
 .btn.soft{background:#1A1A1A;color:#fff}
@@ -628,14 +629,24 @@ function toggle(ref){
 function focusOpen(){ setTimeout(() => { const i = document.querySelector('.inl input'); if (i) i.focus(); }, 30); }
 
 /* ---------- Render ---------- */
+/* Color por ritmo: p = lo hecho (0-1), esp = lo que deberías llevar a esta altura (0-1) */
+function paceTone(p, esp){
+  if (p >= 1) return 'good';
+  if (esp <= .12) return p > 0 ? 'good' : '';
+  const r = p/esp;
+  return r >= .9 ? 'good' : r >= .55 ? 'warn' : 'bad';
+}
+/* Del día: de 8 a 23 h deberías ir avanzando parejo */
+function dayExpected(){ const d = new Date(), h = d.getHours() + d.getMinutes()/60; return Math.max(0, Math.min(1, (h - 8)/15)); }
+const TONE_COLOR = {good:'var(--good)', warn:'var(--warn)', bad:'var(--bad)', '':'var(--accent)'};
 function ringSvg(p){
-  const R = 86, C = 2*Math.PI*R, N = 60, lit = Math.round(p*N);
+  const R = 86, C = 2*Math.PI*R, N = 60, lit = Math.round(p*N), col = TONE_COLOR[paceTone(p, dayExpected())];
   let ticks = '';
   for (let i = 0; i < N; i++){
     const a = (i/N)*2*Math.PI - Math.PI/2, r1 = 99, r2 = i % 5 === 0 ? 108 : 104;
-    ticks += `<line x1="${(110+r1*Math.cos(a)).toFixed(1)}" y1="${(110+r1*Math.sin(a)).toFixed(1)}" x2="${(110+r2*Math.cos(a)).toFixed(1)}" y2="${(110+r2*Math.sin(a)).toFixed(1)}" stroke="${i < lit ? (p >= 1 ? 'var(--good)' : 'var(--accent)') : 'var(--line)'}" stroke-width="2" stroke-linecap="round"/>`;
+    ticks += `<line x1="${(110+r1*Math.cos(a)).toFixed(1)}" y1="${(110+r1*Math.sin(a)).toFixed(1)}" x2="${(110+r2*Math.cos(a)).toFixed(1)}" y2="${(110+r2*Math.sin(a)).toFixed(1)}" stroke="${i < lit ? col : 'var(--line)'}" stroke-width="2" stroke-linecap="round"/>`;
   }
-  return `<svg viewBox="0 0 220 220" aria-hidden="true">${ticks}<circle cx="110" cy="110" r="${R}" fill="none" stroke="var(--track)" stroke-width="12"/><circle id="ring-arc" cx="110" cy="110" r="${R}" fill="none" stroke="${p >= 1 ? 'var(--good)' : 'var(--accent)'}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-p)).toFixed(1)}" transform="rotate(-90 110 110)" style="transition:stroke-dashoffset .6s ease"/></svg>`;
+  return `<svg viewBox="0 0 220 220" aria-hidden="true">${ticks}<circle cx="110" cy="110" r="${R}" fill="none" stroke="var(--track)" stroke-width="12"/><circle id="ring-arc" cx="110" cy="110" r="${R}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-p)).toFixed(1)}" transform="rotate(-90 110 110)" style="transition:stroke-dashoffset .6s ease"/></svg>`;
 }
 function greeting(){ const h = new Date().getHours(); return h < 12 ? 'Buen día, socio' : h < 20 ? 'Buenas tardes, socio' : 'Buenas noches, socio'; }
 
@@ -645,6 +656,7 @@ function renderTop(items){
   const old = ring.querySelector('svg'); if (old) old.remove();
   ring.insertAdjacentHTML('afterbegin', ringSvg(p));
   $('ring-pct').innerHTML = `${Math.round(p*100)}<small>%</small>`;
+  $('ring-pct').className = 'pct num ' + (total ? paceTone(p, dayExpected()) : '');
   $('ring-of').textContent = total ? `${done} de ${total} hechos` : 'Sin lista todavía';
   $('hoy-cnt').textContent = total ? `${done}/${total}` : '';
   $('fecha').textContent = fmtD(today(), {weekday:'long', day:'numeric', month:'long'});
@@ -724,7 +736,7 @@ function renderMetas(){
     let r = v.pct === 1 ? RITMO.logrado : RITMO[m.ritmo];
     const pill = r ? `<span class="pill ${r[0]}">${r[1]}</span>` : '';
     const barCls = v.pct === 1 ? 'good' : (r ? r[0] : '');
-    const pct = v.pct == null ? `<span class="mp na">Sin dato</span>` : `<span class="mp num">${Math.round(v.pct*100)}%</span>`;
+    const pct = v.pct == null ? `<span class="mp na">Sin dato</span>` : `<span class="mp num ${barCls}">${Math.round(v.pct*100)}%</span>`;
     let line;
     if (v.actual == null) line = `<span>Meta: <b>${nf(v.objetivo, dec)}</b>${u}</span>`;
     else if (m.inicio != null && v.objetivo != null && v.objetivo < v.inicio) line = `<span><b>${nf(v.actual, dec)}</b>${u} · meta ${nf(v.objetivo, dec)}${u} · arrancaste en ${nf(v.inicio, dec)}</span>`;
@@ -748,7 +760,10 @@ function renderFinales(){
     const tot = +f.prep_total || 0, hec = +f.prep_hechas || 0, p = tot ? hec/tot : 0;
     const big = n === 0 ? 'HOY' : n;
     const small = n === 0 ? '' : n === 1 ? 'día' : 'días';
-    return `<div class="fin${cls}"><div class="d"><b class="num">${big}</b><span>${small}</span></div><div class="ft"><div class="fn"><b>${esc(f.titulo)}</b>${f.oral ? '<span class="chip">Oral</span>' : ''}<span>${esc(fmtD(f.fecha, {weekday:'short', day:'numeric', month:'short'}))}</span></div>${tot ? `<div class="fp"><div class="bar ${p >= 1 ? 'good' : ''}"><i style="width:${Math.round(p*100)}%"></i></div><span class="num">${hec}/${tot} días de estudio</span></div>` : ''}${f.nota ? `<span class="fnote clamp2">${esc(f.nota)}</span>` : ''}</div></div>`;
+    const falta = tot - hec;
+    const tone = !tot ? '' : p >= 1 ? 'good' : falta > n ? 'bad' : falta > n*.6 ? 'warn' : 'good';
+    const w = Math.max(Math.round(p*100), tone === 'bad' ? 3 : 0);
+    return `<div class="fin${cls}"><div class="d"><b class="num">${big}</b><span>${small}</span></div><div class="ft"><div class="fn"><b>${esc(f.titulo)}</b>${f.oral ? '<span class="chip">Oral</span>' : ''}<span>${esc(fmtD(f.fecha, {weekday:'short', day:'numeric', month:'short'}))}</span></div>${tot ? `<div class="fp"><div class="bar ${tone}"><i style="width:${w}%"></i></div><span class="num">${hec}/${tot} días de estudio</span></div>` : ''}${f.nota ? `<span class="fnote clamp2">${esc(f.nota)}</span>` : ''}</div></div>`;
   }).join('');
 }
 
@@ -758,9 +773,12 @@ function renderSemana(){
   const hs = s && Array.isArray(s.habitos) ? s.habitos : [];
   $('sem-rango').textContent = s && s.desde ? `Desde el ${fmtD(s.desde, {weekday:'short', day:'numeric'})}` : '';
   if (!hs.length){ box.innerHTML = `<p class="empty">${loaded.e ? 'Sin datos de hábitos.' : 'Cargando hábitos…'}</p>`; return; }
+  const semEsp = s.desde ? Math.max(0, Math.min(1, (dayN(today()) - dayN(s.desde) + 1)/7)) : 1;
   box.innerHTML = hs.map(h => {
     const meta = +h.meta || 0, hec = +h.hechos || 0, p = meta ? Math.min(1, hec/meta) : 0, ok = meta && hec >= meta;
-    return `<div class="hab${ok ? ' ok' : ''}"><span>${esc(h.nombre)}</span><span class="n num">${hec}/${meta}</span><div class="bar ${ok ? 'good' : p < .5 ? 'warn' : ''}"><i style="width:${Math.round(p*100)}%"></i></div></div>`;
+    const tone = ok ? 'good' : paceTone(p, semEsp);
+    const w = Math.max(Math.round(p*100), tone === 'bad' ? 3 : 0);
+    return `<div class="hab${ok ? ' ok' : ''}"><span>${esc(h.nombre)}</span><span class="n num ${ok ? '' : tone}">${hec}/${meta}</span><div class="bar ${tone}"><i style="width:${w}%"></i></div></div>`;
   }).join('');
 }
 
@@ -773,7 +791,7 @@ function renderDieta(){
   box.innerHTML = `<div class="diet">
     <div class="kpi"><b class="num">${nf(kc)}<small> / ${nf(meta)}</small></b><span>kcal ${quedan >= 0 ? `· quedan ${nf(quedan)}` : `· ${nf(-quedan)} de más`}</span></div>
     <div class="kpi"><b class="num">${d.peso != null ? nf(d.peso, 1) : '—'}<small> kg</small></b><span>${d.peso_fecha ? 'Último pesaje · ' + esc(fmtD(d.peso_fecha, {weekday:'short', day:'numeric'})) : 'Sin pesaje reciente'}</span></div>
-    <div class="bar ${quedan < 0 ? 'bad' : ''}"><i style="width:${Math.round(p*100)}%"></i></div>
+    <div class="bar ${!meta ? '' : kc > meta*1.05 ? 'bad' : kc > meta ? 'warn' : 'good'}"><i style="width:${Math.round(p*100)}%"></i></div>
   </div>
   <div class="dl"><span>${esc(d.nota || '')}</span><a href="${MINICUT}" target="_blank" rel="noopener">Abrir Mini Cut ↗</a></div>`;
 }
@@ -783,8 +801,16 @@ function mesesSvg(ms){
   const bw = (W - gap*(n+1))/n, max = Math.max(1, ...ms.map(m => +m.v || 0));
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ventas por mes">` + ms.map((m, i) => {
     const v = +m.v || 0, h = (H - top - bot) * v / max, x = gap + i*(bw + gap), y = H - bot - h;
-    const fill = m.curso ? 'var(--accent-dim)' : (i === n-2 ? '#FFFFFF' : '#2A2A2A');
-    const stroke = m.curso ? ' stroke="var(--accent)" stroke-dasharray="4 3" stroke-width="1.5"' : '';
+    const prev = i > 0 ? (+ms[i-1].v || 0) : null;
+    let tone = '';
+    if (m.curso){
+      const d = new Date(), dim = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+      const proy = v * dim / Math.max(1, d.getDate());
+      tone = prev == null || !prev ? '' : proy >= prev ? 'good' : proy >= prev*.8 ? 'warn' : 'bad';
+    } else if (prev != null) tone = v >= prev ? 'good' : 'bad';
+    const col = TONE_COLOR[tone];
+    const fill = m.curso ? (tone ? `var(--${tone}-dim)` : 'var(--accent-dim)') : (tone ? col : '#2A2A2A');
+    const stroke = m.curso ? ` stroke="${col}" stroke-dasharray="4 3" stroke-width="1.5"` : '';
     return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2, h).toFixed(1)}" rx="5" fill="${fill}"${stroke}/>`
       + `<text x="${(x + bw/2).toFixed(1)}" y="${(y - 7).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--fg)" font-family="Inter, sans-serif">${v}</text>`
       + `<text x="${(x + bw/2).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="Inter, sans-serif">${esc(m.m)}${m.curso ? ' (en curso)' : ''}</text>`;
