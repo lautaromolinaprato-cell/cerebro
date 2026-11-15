@@ -250,7 +250,8 @@ section[id]{scroll-margin-top:16px}
 .login .err{color:#fff;background:#1A1A1A;border:1px solid #333;border-radius:10px;padding:10px 12px;font-size:14px}
 .login .err[hidden]{display:none}
 .login .btn{padding:12px 14px;font-size:16px}
-.login .linkb{justify-self:start;color:var(--muted)}
+.login .linkb{justify-self:start;margin-left:0;color:var(--muted)}
+body:has(.login:not([hidden])){overflow:hidden}
 .salir{all:unset;cursor:pointer;color:var(--muted);font-size:13px;padding:8px 12px;margin-top:auto}
 .salir:hover{color:var(--fg)}
 /* Tu socio: cómo voy, consejos y mental */
