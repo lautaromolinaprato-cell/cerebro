@@ -100,8 +100,22 @@ input::placeholder{color:#5E5E5E}
 .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
 .btn:disabled{opacity:.5;cursor:default}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.add{display:flex;gap:8px}
+.add{display:flex;gap:8px;flex-wrap:wrap}
 .add input{flex:1}
+.add #add-in{flex:1 1 230px}
+.add .btn{flex:0 0 auto}
+.add .addh{flex:1 0 130px;max-width:190px;display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:0 4px 0 10px;background:var(--bg);color:var(--muted)}
+.add .addh svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+.add .addh input{border:0;padding:9px 6px 9px 0;width:auto;min-width:74px;background:transparent;color:var(--fg);color-scheme:dark}
+.add .addh:focus-within{border-color:#555}
+.fecha-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.avbtn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--fg);border:1px solid #3A3A3A;border-radius:999px;padding:4px 11px 4px 9px}
+.avbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.avbtn.on{color:var(--good);border-color:rgba(34,197,94,.35)}
+.avbtn.off{color:var(--muted)}
+.avbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.avmsg{font-size:13.5px;color:var(--muted);margin:0;max-width:62ch}
+.avmsg.ok{color:var(--good)} .avmsg.err{color:var(--bad)}
 .empty{color:var(--muted);margin:0;padding:8px 0}
 
 /* Metas */
@@ -359,7 +373,8 @@ body:has(.login:not([hidden])){overflow:hidden}
       <div class="c"><span class="pct num" id="ring-pct">0<small>%</small></span><span class="of num" id="ring-of">Cargando…</span></div>
     </div>
     <div class="hello">
-      <p class="lbl" id="fecha"></p>
+      <div class="fecha-row"><p class="lbl" id="fecha"></p><button class="avbtn" id="av-btn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span id="av-t">Activar avisos</span></button></div>
+      <p class="avmsg" id="av-msg" role="status" aria-live="polite" hidden></p>
       <h1 id="saludo">Hola, socio</h1>
       <p class="jarvis" id="jarvis">Conectando con tu Cerebro…</p>
       <div class="foco" id="foco" hidden><span class="lbl">Foco de hoy</span><p id="foco-t"></p></div>
@@ -376,6 +391,7 @@ body:has(.login:not([hidden])){overflow:hidden}
       <div id="bloques" style="display:grid;gap:20px"><p class="empty">Cargando tu lista…</p></div>
       <form class="add" id="add-form" autocomplete="off">
         <input id="add-in" type="text" maxlength="120" placeholder="Agregar algo para hoy" aria-label="Agregar una tarea para hoy">
+        <label class="addh" title="Hora del aviso (opcional)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><input id="add-hora" type="time" aria-label="Avisarme a esta hora (opcional)"></label>
         <button class="btn soft" type="submit">Agregar</button>
       </form>
       <p class="msg" id="msg" role="status" aria-live="polite"></p>
@@ -584,7 +600,7 @@ function bloques(){
     items: (Array.isArray(b.items) ? b.items : []).filter(i => i && i.ref && !oc.has(i.ref))
   })) : [];
   const nv = nuevasPend();
-  if (nv.length) bs.push({hora:'Hoy', titulo:'Agregado por vos', items: nv.map(n => ({ref:'nueva:'+n.id, texto:n.texto, tipo:'tarea', hecho:false, nueva:true}))});
+  if (nv.length) bs.push({hora:'Hoy', titulo:'Agregado por vos', items: nv.map(n => ({ref:'nueva:'+n.id, texto:(n.hora ? n.hora + ' · ' : '') + n.texto, tipo:'tarea', hecho:false, nueva:true}))});
   return bs.filter(b => b.items.length);
 }
 const allItems = () => bloques().flatMap(b => b.items);
@@ -879,9 +895,12 @@ document.addEventListener('submit', e => {
     const t = $('add-in').value.trim().slice(0, 120);
     if (!t) return;
     const doc = ticksDoc();
-    saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.concat([{id: rid(), texto: t, en: iso()}])}));
-    $('add-in').value = '';
-    msg('Agregado. Lo creo en Routly en la próxima sincronización.', 'ok');
+    const hora = /^\d{2}:\d{2}$/.test($('add-hora').value) ? $('add-hora').value : '';
+    const nueva = {id: rid(), texto: t, en: iso()};
+    if (hora) nueva.hora = hora;
+    saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.concat([nueva])}));
+    $('add-in').value = ''; $('add-hora').value = '';
+    msg(hora ? (avOn ? `Agregado. Te aviso a las ${hora}.` : `Agregado para las ${hora}. Activá los avisos arriba para que te llegue al celu.`) : 'Agregado. Lo creo en Routly en la próxima sincronización.', 'ok');
     return;
   }
   if (f.dataset.form === 'kg'){
@@ -1029,6 +1048,65 @@ window.addEventListener('scroll', () => { if (!navTick){ navTick = true; request
 window.addEventListener('resize', navActive);
 navActive();
 
+/* ---------- Avisos al celular (Web Push) ---------- */
+const AV_KEY = 'BHZIl8RlvHj8ki4dARBx2LGpNSr2OM-crR_I3zkCISs7-RFYG-J_2qvhqO2sdCl3oNs9KF8_8isNKnwmqGInW8Q';
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const pushOK = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+let avOn = false, avState = '', avSynced = false;
+function b64u(s){ const pd = '='.repeat((4 - s.length % 4) % 4); const b = atob((s + pd).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, c => c.charCodeAt(0)); }
+function avMsg(t, cls){ const m = $('av-msg'); m.textContent = t || ''; m.className = 'avmsg' + (cls ? ' ' + cls : ''); m.hidden = !t; }
+async function avGuardar(sub){
+  const j = sub.toJSON();
+  const {data, error: e1} = await sb.from('cerebro_docs').select('data').eq('path', 'push/subs').maybeSingle();
+  if (e1) throw e1;
+  const subs = ((data && data.data && data.data.subs) || []).filter(x => x && x.endpoint !== j.endpoint);
+  subs.push({endpoint: j.endpoint, keys: j.keys, ua: navigator.userAgent.slice(0, 120), en: iso()});
+  const {error} = await sb.from('cerebro_docs').upsert({path: 'push/subs', data: {subs: subs.slice(-6)}});
+  if (error) throw error;
+}
+async function avEstado(){
+  const b = $('av-btn');
+  let st = 'off';
+  if (!pushOK) st = isIOS && !isStandalone ? 'instalar' : 'nosoporta';
+  else if (Notification.permission === 'denied') st = 'bloqueado';
+  else if (Notification.permission === 'granted'){
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub){ st = 'on'; if (!avSynced){ avSynced = true; avGuardar(sub).catch(() => { avSynced = false; }); } }
+    } catch (e) {}
+  }
+  avState = st; avOn = st === 'on';
+  b.hidden = st === 'nosoporta';
+  b.className = 'avbtn' + (st === 'on' ? ' on' : st === 'bloqueado' ? ' off' : '');
+  $('av-t').textContent = st === 'on' ? 'Avisos activos' : st === 'bloqueado' ? 'Avisos bloqueados' : 'Activar avisos';
+}
+async function avClick(){
+  if (avState === 'instalar'){ avMsg('Para que te lleguen al iPhone: en Safari tocá Compartir → "Agregar a inicio", abrí Cerebro desde ese ícono y tocá de nuevo "Activar avisos".'); return; }
+  if (avState === 'bloqueado'){ avMsg('Los bloqueaste antes. Activalos en Ajustes → Notificaciones → Cerebro y volvé a abrir la app.', 'err'); return; }
+  if (avState === 'on'){
+    try { await db.doc('push/test').set({en: iso()}); avMsg('Te mando uno de prueba en menos de 5 minutos.', 'ok'); }
+    catch (e) { avMsg('No se pudo pedir la prueba. Probá de nuevo.', 'err'); }
+    return;
+  }
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted'){ await avEstado(); avMsg(perm === 'denied' ? 'Quedaron bloqueados. Activalos en Ajustes → Notificaciones → Cerebro.' : 'No se activaron. Tocá de nuevo cuando quieras.', perm === 'denied' ? 'err' : ''); return; }
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64u(AV_KEY)});
+    await avGuardar(sub); avSynced = true;
+    await avEstado();
+    reg.showNotification('Avisos activados', {body: 'Así te van a llegar los recordatorios del Cerebro.', icon: 'icon-192.png', tag: 'activado'}).catch(() => {});
+    avMsg('Listo. Te aviso con la lista del día, los bloques con hora, cómo vas, los hábitos que faltan y cuando tu socio te responde.', 'ok');
+  } catch (e) {
+    console.error(e);
+    avMsg('No se pudieron activar. Cerrá y volvé a abrir la app, y probá de nuevo.', 'err');
+  }
+}
+$('av-btn').addEventListener('click', avClick);
+
 /* ---------- Arranque: Supabase (proyecto "cerebro", aparte de Routly) ---------- */
 const SB_URL = 'https://ecbxvokfdeznjgwehxmp.supabase.co';
 const SB_KEY = 'sb_publishable_4LHJaYCOxdjdFHBqs0du6g_5PeyEDRh';
@@ -1104,6 +1182,7 @@ async function startApp(){
   try { await db.load(); }
   catch (e) { loaded.e = loaded.t = loaded.m = loaded.p = true; render(); msg('No se pudieron traer tus datos. Revisá la conexión.', 'err'); }
   db.listen();
+  avEstado();
 }
 
 let modoAlta = false;
