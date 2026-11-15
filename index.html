@@ -89,7 +89,11 @@ p{margin:0}
 .tag{font-size:10.5px;font-family:var(--f-display);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap;margin-top:4px}
 .tag.habito{color:var(--accent);border-color:rgba(255,255,255,.3)}
 .tag.comida{color:var(--warn);border-color:rgba(242,184,75,.3)}
-.x{all:unset;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px}
+.x{all:unset;cursor:pointer;color:var(--muted);font-size:20px;line-height:1;padding:2px 6px;border-radius:6px}
+.x:hover{color:var(--fg);background:var(--track)}
+.x:focus-visible{outline:2px solid var(--accent)}
+.itr{display:flex;align-items:flex-start;gap:6px}
+.undo{all:unset;cursor:pointer;text-decoration:underline;font-weight:600;margin-left:6px;color:var(--fg)}
 .inl{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
 .inl input{flex:1 1 140px}
 .inl label{display:grid;gap:4px;font-size:13px;color:var(--muted);flex:1 1 120px}
@@ -339,8 +343,10 @@ body:has(.login:not([hidden])){overflow:hidden}
 @media (max-width:560px){
   .wrap{padding:20px 16px 48px;gap:20px}
   .top{grid-template-columns:1fr;gap:18px}
-  .ring{width:168px;height:168px}
-  .ring .pct{font-size:44px}
+  .ring{width:min(76vw,290px);height:min(76vw,290px);justify-self:center}
+  .ring .pct{font-size:76px}
+  .ring .pct small{font-size:32px}
+  .ring .of{font-size:16px}
   .panel{padding:16px}
   .jarvis{font-size:17.5px}
 }
@@ -572,6 +578,7 @@ function renderPlata(){
     <div class="sec"><p class="lbl">Compras · qué entra este mes</p>${plan.map(compraRow).join('') || '<p class="empty">Sin compras anotadas.</p>'}</div>
     <div class="sec"><p class="lbl">Para vender · ${money(vendible)} posibles${vendido ? ` · ${money(vendido)} vendido` : ''}</p>${ventas.map(ventaRow).join('') || '<p class="empty">Nada para vender anotado.</p>'}</div>`;
 }
+let lastDel = null;
 let openRef = null, editMeta = null, justRef = null, writeChain = Promise.resolve(), showAllAlerts = false;
 
 /* ---------- Estado derivado ---------- */
@@ -710,7 +717,7 @@ function itemHtml(it){
       form = `<form class="inl" data-form="comida" data-ref="${esc(it.ref)}">${it.libre ? '' : `<button class="btn soft" type="button" data-siempre>Lo de siempre</button>`}<input id="in-comida" type="text" maxlength="200" placeholder="${it.libre ? 'Qué comiste (ej: hamburguesa y helado)' : 'O escribí qué comiste'}" aria-label="Qué comiste" autocomplete="off"><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-cancel>Cancelar</button></form>`;
     }
   }
-  const right = it.nueva ? `<button class="x" type="button" data-del="${esc(it.ref)}" aria-label="Quitar ${esc(it.texto)}">×</button>` : `<span class="tag ${tipo}">${TAGS[tipo]}</span>`;
+  const right = `<span class="itr">${it.nueva ? '' : `<span class="tag ${tipo}">${TAGS[tipo]}</span>`}<button class="x" type="button" data-del="${esc(it.ref)}" aria-label="Sacar de hoy: ${esc(it.texto)}" title="Sacar de hoy">×</button></span>`;
   return `<li class="it${done ? ' done' : ''}${justRef === it.ref ? ' just' : ''}"><button class="ck" type="button" data-ref="${esc(it.ref)}" aria-pressed="${done}" aria-label="${done ? 'Desmarcar' : 'Marcar'}: ${esc(it.texto)}"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></button><div><button class="t" type="button" data-ref="${esc(it.ref)}">${esc(it.texto)}</button>${sub}${form}</div>${right}</li>`;
 }
 
@@ -876,10 +883,28 @@ document.addEventListener('click', e => {
   if (e.target.closest('[data-cancel-meta]')){ editMeta = null; render(); return; }
   const siempre = e.target.closest('[data-siempre]');
   if (siempre){ const f = siempre.closest('form'); openRef = null; setTick(f.dataset.ref, true, 'Lo de siempre'); msg('Anotado. Lo cargo en Mini Cut en la próxima sincronización.', 'ok'); return; }
+  const undo = e.target.closest('[data-undo]');
+  if (undo){
+    const ref = undo.dataset.undo, doc = ticksDoc();
+    if (ref.startsWith('nueva:') && lastDel && lastDel.ref === ref) saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.concat([lastDel.n])}));
+    else saveTicks(Object.assign({}, doc, {ocultos: doc.ocultos.filter(r => r !== ref)}));
+    lastDel = null; msg('Volvió a la lista.', 'ok');
+    return;
+  }
   const del = e.target.closest('[data-del]');
   if (del){
-    const id = del.dataset.del.replace(/^nueva:/, ''), doc = ticksDoc();
-    saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.filter(n => n.id !== id)}));
+    const ref = del.dataset.del, doc = ticksDoc();
+    if (openRef === ref) openRef = null;
+    if (ref.startsWith('nueva:')){
+      const id = ref.slice(6);
+      lastDel = {ref, n: doc.nuevas.find(n => n.id === id)};
+      saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.filter(n => n.id !== id)}));
+    } else {
+      lastDel = {ref};
+      saveTicks(Object.assign({}, doc, {ocultos: doc.ocultos.filter(r => r !== ref).concat([ref])}));
+    }
+    const m = $('msg'); m.className = 'msg';
+    m.innerHTML = `Lo saqué de hoy.<button class="undo" type="button" data-undo="${esc(ref)}">Deshacer</button>`;
     return;
   }
   const ed = e.target.closest('[data-edit]');
@@ -1078,7 +1103,7 @@ async function avEstado(){
     } catch (e) {}
   }
   avState = st; avOn = st === 'on';
-  b.hidden = st === 'nosoporta';
+  b.hidden = st === 'nosoporta' || st === 'on';
   b.className = 'avbtn' + (st === 'on' ? ' on' : st === 'bloqueado' ? ' off' : '');
   $('av-t').textContent = st === 'on' ? 'Avisos activos' : st === 'bloqueado' ? 'Avisos bloqueados' : 'Activar avisos';
 }
@@ -1099,7 +1124,7 @@ async function avClick(){
     await avGuardar(sub); avSynced = true;
     await avEstado();
     reg.showNotification('Avisos activados', {body: 'Así te van a llegar los recordatorios del Cerebro.', icon: 'icon-192.png', tag: 'activado'}).catch(() => {});
-    avMsg('Listo. Te aviso con la lista del día, los bloques con hora, cómo vas, los hábitos que faltan y cuando tu socio te responde.', 'ok');
+    avMsg('');
   } catch (e) {
     console.error(e);
     avMsg('No se pudieron activar. Cerrá y volvé a abrir la app, y probá de nuevo.', 'err');
