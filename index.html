@@ -111,6 +111,22 @@ p{margin:0}
 .tag.comida{color:var(--warn);border-color:rgba(242,184,75,.3)}
 .x{all:unset;cursor:pointer;color:var(--muted);font-size:20px;line-height:1;padding:2px 6px;border-radius:6px}
 .x:hover{color:var(--fg);background:var(--track)}
+.mv{all:unset;cursor:pointer;color:var(--muted);padding:3px 4px;border-radius:6px;display:grid;place-items:center;margin-top:1px}
+.mv svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.mv:hover{color:var(--fg);background:var(--track)}
+.mv:focus-visible{outline:2px solid var(--accent)}
+.mvf{align-items:center}
+.mvf .mvl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);flex:0 1 auto}
+.mvf .mvl input{flex:0 0 auto;width:auto;min-width:0;padding:7px 8px}
+.mvf input[type=time],.mvf input[type=date]{color-scheme:var(--scheme)}
+.mvf .btn{padding:7px 12px;font-size:14px}
+.it.ro .ck{opacity:.3;cursor:default}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:999px;padding:2px;gap:2px}
+.seg[hidden]{display:none}
+.seg button{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;padding:3px 11px;border-radius:999px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--inv-bg);color:var(--inv-fg)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.vnota{font-size:13.5px;color:var(--muted);margin:-4px 0 2px}
 .x:focus-visible{outline:2px solid var(--accent)}
 .itr{display:flex;align-items:flex-start;gap:6px}
 .undo{all:unset;cursor:pointer;text-decoration:underline;font-weight:600;margin-left:6px;color:var(--fg)}
@@ -413,7 +429,8 @@ body:has(.login:not([hidden])){overflow:hidden}
   <div class="cols">
     <div class="side">
     <section class="panel" id="sec-hoy" aria-labelledby="h-hoy">
-      <div class="ph"><h2 id="h-hoy">Hoy</h2><span class="lbl num" id="hoy-cnt"></span></div>
+      <div class="ph"><h2 id="h-hoy">Hoy</h2><div class="seg" id="vista-seg" role="group" aria-label="Qué lista ver" hidden><button type="button" data-vista="hoy" aria-pressed="true">Hoy</button><button type="button" data-vista="manana" aria-pressed="false">Mañana</button></div><span class="lbl num" id="hoy-cnt"></span></div>
+      <p class="vnota" id="vista-nota" hidden></p>
       <div id="bloques" style="display:grid;gap:20px"><p class="empty">Cargando tu lista…</p></div>
       <form class="add" id="add-form" autocomplete="off">
         <input id="add-in" type="text" maxlength="120" placeholder="Agregar algo para hoy" aria-label="Agregar una tarea para hoy">
@@ -606,46 +623,92 @@ let lastDel = null;
 let openRef = null, editMeta = null, justRef = null, writeChain = Promise.resolve(), showAllAlerts = false;
 
 /* ---------- Estado derivado ---------- */
+let manana = null, vista = 'hoy', movRef = null;
 const listDate = () => (estado && estado.fecha) || today();
-const genTime = () => (estado && estado.generado) ? Date.parse(estado.generado) || 0 : 0;
-function ticksDoc(){
-  const d = ticksAll[listDate()] || {};
-  return { fecha: listDate(), items: d.items || {}, nuevas: Array.isArray(d.nuevas) ? d.nuevas : [], ocultos: Array.isArray(d.ocultos) ? d.ocultos : [] };
+const hasManana = () => !!(manana && manana.fecha && manana.fecha > listDate() && Array.isArray(manana.bloques) && manana.bloques.length);
+const curVista = () => (vista === 'manana' && hasManana()) ? 'manana' : 'hoy';
+const srcOf = v => v === 'manana' ? manana : estado;
+const dateOf = v => v === 'manana' ? manana.fecha : listDate();
+function genOf(f){ const s = (manana && manana.fecha === f) ? manana : estado; return s && s.generado ? Date.parse(s.generado) || 0 : 0; }
+function addDays(f, n){ const d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+function ticksDoc(f){
+  f = f || dateOf(curVista());
+  const d = ticksAll[f] || {};
+  return { fecha: f, items: d.items || {}, nuevas: Array.isArray(d.nuevas) ? d.nuevas : [], ocultos: Array.isArray(d.ocultos) ? d.ocultos : [], mov: d.mov && typeof d.mov === 'object' ? d.mov : {} };
 }
-function tickOf(ref){
-  const t = ticksDoc().items[ref];
-  return (t && (Date.parse(t.en) || 0) > genTime()) ? t : null;
+function tickOf(ref, f){
+  f = f || dateOf(curVista());
+  const t = ticksDoc(f).items[ref];
+  return (t && (Date.parse(t.en) || 0) > genOf(f)) ? t : null;
 }
 function isDone(it){
   if (isPlataRef(it.ref)) return plataDone(it.ref);
-  const t = tickOf(it.ref); return t ? !!t.hecho : !!it.hecho;
+  const t = tickOf(it.ref, it._f); return t ? !!t.hecho : !!it.hecho;
 }
-function nuevasPend(){
-  const synced = new Set((estado && estado.nuevas_sincronizadas) || []);
-  return ticksDoc().nuevas.filter(n => n && n.id && !synced.has(n.id));
+function nuevasPend(f){
+  const synced = new Set([].concat((estado && estado.nuevas_sincronizadas) || [], (manana && manana.nuevas_sincronizadas) || []));
+  return ticksDoc(f).nuevas.filter(n => n && n.id && !synced.has(n.id));
 }
-function bloques(){
-  const oc = new Set(ticksDoc().ocultos);
-  const bs = (estado && Array.isArray(estado.bloques)) ? estado.bloques.map(b => ({
-    hora: String(b.hora || ''), titulo: String(b.titulo || ''),
-    items: (Array.isArray(b.items) ? b.items : []).filter(i => i && i.ref && !oc.has(i.ref))
-  })) : [];
-  const nv = nuevasPend();
-  if (nv.length) bs.push({hora:'Hoy', titulo:'Agregado por vos', items: nv.map(n => ({ref:'nueva:'+n.id, texto:(n.hora ? n.hora + ' · ' : '') + n.texto, tipo:'tarea', hecho:false, nueva:true}))});
-  return bs.filter(b => b.items.length);
+/* Orden por hora: "10:00" exacto; si no, una hora aproximada por el nombre del bloque */
+const HORA_KEY = [[/levant|arranque|desayun|temprano/i, 450], [/mañana/i, 540], [/mediod|almuer/i, 780], [/comida/i, 790], [/tarde|merienda/i, 930], [/noche|cerr|cena/i, 1260], [/^hoy$|agregad/i, 1400]];
+function horaMin(h){
+  const m = /^(\d{1,2}):(\d{2})/.exec(String(h || '').trim());
+  if (m) return (+m[1]) * 60 + (+m[2]);
+  for (const [re, v] of HORA_KEY) if (re.test(String(h || ''))) return v;
+  return null;
 }
-const allItems = () => bloques().flatMap(b => b.items);
+const MOVIBLE = it => it.nueva || /^task:/.test(it.ref) || it.tipo === 'tarea' || it.tipo === 'estudio';
+function bloques(v){
+  v = v || curVista();
+  const src = srcOf(v), f = dateOf(v), td = ticksDoc(f), oc = new Set(td.ocultos);
+  const raw = (src && Array.isArray(src.bloques)) ? src.bloques : [];
+  const out = raw.map(b => ({hora: String(b.hora || ''), titulo: String(b.titulo || ''), items: []}));
+  const enHora = (h, it) => {
+    let blk = out.find(x => x.hora === h);
+    if (!blk){ blk = {hora: h, titulo: '', items: []}; out.push(blk); }
+    blk.items.push(it);
+  };
+  // it._f: día de la lista (para tachar); it._mf: día cuyo ticks guarda su movimiento
+  const place = (it, home, movDoc) => {
+    if (oc.has(it.ref)) return;
+    const m = movDoc.mov[it.ref];
+    if (m && m.fecha && m.fecha !== f) return;
+    const x = Object.assign({}, it, {_f: f, _mf: movDoc.fecha});
+    if (m && /^\d{2}:\d{2}$/.test(m.hora || '')){ x._hora = m.hora; enHora(m.hora, x); return; }
+    if (home) home.items.push(x); else enHora(it._hDef || 'Hoy', x);
+  };
+  raw.forEach((b, bi) => (Array.isArray(b.items) ? b.items : []).forEach(i => { if (i && i.ref) place(i, out[bi], td); }));
+  const nueva = n => ({ref: 'nueva:' + n.id, texto: n.texto, tipo: 'tarea', hecho: false, nueva: true, _hDef: n.hora || 'Hoy'});
+  nuevasPend(f).forEach(n => place(nueva(n), null, td));
+  // En la vista Mañana: lo que moviste desde la lista de hoy
+  if (v === 'manana'){
+    const hoy = listDate(), th = ticksDoc(hoy), ohoy = new Set(th.ocultos);
+    const vienen = [];
+    (estado && Array.isArray(estado.bloques) ? estado.bloques : []).forEach(b => (b.items || []).forEach(i => { if (i && i.ref && !ohoy.has(i.ref) && th.mov[i.ref] && th.mov[i.ref].fecha === f) vienen.push(Object.assign({}, i, {_hDef: 'Movido de hoy'})); }));
+    nuevasPend(hoy).forEach(n => { const r = 'nueva:' + n.id; if (th.mov[r] && th.mov[r].fecha === f) vienen.push(Object.assign(nueva(n), {_hDef: 'Movido de hoy'})); });
+    vienen.forEach(it => {
+      if (oc.has(it.ref)) return;
+      const m = th.mov[it.ref], x = Object.assign({}, it, {_f: f, _mf: hoy});
+      if (/^\d{2}:\d{2}$/.test(m.hora || '')){ x._hora = m.hora; enHora(m.hora, x); } else enHora(it._hDef, x);
+    });
+  }
+  let last = -1;
+  const keyed = out.filter(b => b.items.length).map((b, i) => { let k = horaMin(b.hora); if (k == null) k = last; last = k; return {b, k, i}; });
+  keyed.sort((a, b) => a.k - b.k || a.i - b.i);
+  return keyed.map(x => x.b);
+}
+const allItems = v => bloques(v).flatMap(b => b.items);
 
 /* ---------- Escrituras ---------- */
 function msg(t, cls){ const m = $('msg'); m.textContent = t || ''; m.className = 'msg' + (cls ? ' ' + cls : ''); }
 function saveTicks(doc, op){
-  const fecha = listDate();
+  const fecha = doc.fecha || listDate();
   ticksAll[fecha] = doc;
   render();
   if (!db){ msg('Sin conexión: no se pudo guardar.', 'err'); return; }
   const apply = d => {
     d = d && typeof d === 'object' ? d : {};
-    d.fecha = fecha; d.items = d.items || {};
+    d.fecha = fecha; d.items = d.items || {}; if (d.mov && typeof d.mov !== 'object') d.mov = {};
     d.nuevas = Array.isArray(d.nuevas) ? d.nuevas : []; d.ocultos = Array.isArray(d.ocultos) ? d.ocultos : [];
     op(d); return d;
   };
@@ -654,13 +717,26 @@ function saveTicks(doc, op){
   });
 }
 function setTick(ref, hecho, valor){
-  const doc = ticksDoc();
+  const doc = ticksDoc(listDate());
   const items = Object.assign({}, doc.items);
   const v = {hecho: !!hecho, en: iso()};
   if (valor != null && valor !== '') v.valor = valor;
   items[ref] = v;
   justRef = hecho ? ref : null;
   saveTicks(Object.assign({}, doc, {items}), d => { d.items[ref] = v; });
+}
+/* Mover un ítem de hora o de día. Se guarda en el ticks del día donde vive el ítem (mf). */
+function guardarMov(ref, mf, h, d){
+  const val = {en: iso()};
+  if (h) val.hora = h;
+  if (d && d !== mf) val.fecha = d;
+  const has = !!(val.hora || val.fecha);
+  const doc = ticksDoc(mf), mov = Object.assign({}, doc.mov);
+  if (has) mov[ref] = val; else delete mov[ref];
+  movRef = null;
+  saveTicks(Object.assign({}, doc, {mov}), dd => { dd.mov = dd.mov && typeof dd.mov === 'object' ? dd.mov : {}; if (has) dd.mov[ref] = val; else delete dd.mov[ref]; });
+  const rt = /^(task|nueva):/.test(ref) ? ' En Routly se cambia en la próxima sincronización.' : '';
+  msg(val.fecha ? `Movido al ${fmtD(val.fecha, {weekday:'long', day:'numeric'})}${val.hora ? ' a las ' + val.hora : ''}.${rt}` : val.hora ? `Movido a las ${val.hora}.` : 'Volvió a su lugar.', 'ok');
 }
 function toggle(ref){
   if (isPlataRef(ref)){
@@ -670,7 +746,8 @@ function toggle(ref){
     msg(val ? (k === 'fijo' ? '¡Pagado! Lo tacho en tu presupuesto en la próxima sincronización.' : k === 'venta' ? '¡Vendido! Lo sumo en la próxima sincronización.' : 'Anotado como comprado.') : 'Desmarcado.', val ? 'ok' : '');
     return;
   }
-  const it = allItems().find(i => i.ref === ref);
+  if (curVista() === 'manana'){ msg('Esto es para mañana: lo tachás mañana. Podés moverlo o sacarlo.', ''); return; }
+  const it = allItems('hoy').find(i => i.ref === ref);
   if (!it) return;
   const done = isDone(it);
   if (!done && (it.pide === 'kg' || it.pide === 'comida')){ openRef = openRef === ref ? null : ref; render(); focusOpen(); return; }
@@ -710,7 +787,6 @@ function renderTop(items){
   $('ring-pct').innerHTML = `${Math.round(p*100)}<small>%</small>`;
   $('ring-pct').className = 'pct num ' + (total ? paceTone(p, dayExpected()) : '');
   $('ring-of').textContent = total ? `${done} de ${total} hechos` : 'Sin lista todavía';
-  $('hoy-cnt').textContent = total ? `${done}/${total}` : '';
   $('fecha').textContent = fmtD(today(), {weekday:'long', day:'numeric', month:'long'});
   $('saludo').textContent = greeting();
   const esHoy = estado && estado.fecha === today();
@@ -746,13 +822,28 @@ function itemHtml(it){
       form = `<form class="inl" data-form="comida" data-ref="${esc(it.ref)}">${it.libre ? '' : `<button class="btn soft" type="button" data-siempre>Lo de siempre</button>`}<input id="in-comida" type="text" maxlength="200" placeholder="${it.libre ? 'Qué comiste (ej: hamburguesa y helado)' : 'O escribí qué comiste'}" aria-label="Qué comiste" autocomplete="off"><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-cancel>Cancelar</button></form>`;
     }
   }
-  const right = `<span class="itr">${it.nueva ? '' : `<span class="tag ${tipo}">${TAGS[tipo]}</span>`}<button class="x" type="button" data-del="${esc(it.ref)}" aria-label="Sacar de hoy: ${esc(it.texto)}" title="Sacar de hoy">×</button></span>`;
-  return `<li class="it${done ? ' done' : ''}${justRef === it.ref ? ' just' : ''}"><button class="ck" type="button" data-ref="${esc(it.ref)}" aria-pressed="${done}" aria-label="${done ? 'Desmarcar' : 'Marcar'}: ${esc(it.texto)}"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></button><div><button class="t" type="button" data-ref="${esc(it.ref)}">${esc(it.texto)}</button>${sub}${form}</div>${right}</li>`;
+  if (movRef === it.ref){
+    const m = ticksDoc(it._mf).mov[it.ref] || {};
+    const hv = m.hora || it._hora || (it.nueva && /^\d{2}:\d{2}$/.test(it._hDef || '') ? it._hDef : '');
+    const dia = MOVIBLE(it) ? `<label class="mvl">Día<input id="mv-d" type="date" min="${listDate()}" value="${esc(m.fecha || it._f)}"></label>` : '';
+    form += `<form class="inl mvf" data-form="mov" data-ref="${esc(it.ref)}" data-mf="${esc(it._mf)}"><label class="mvl">Hora<input id="mv-h" type="time" value="${esc(hv)}"></label>${dia}<button class="btn" type="submit">Mover</button>${(m.hora || m.fecha) ? '<button class="btn ghost" type="button" data-mov-clear>Como estaba</button>' : ''}<button class="btn ghost" type="button" data-mov-cancel>Cancelar</button></form>`;
+  }
+  const ro = curVista() === 'manana';
+  const right = `<span class="itr">${it.nueva ? '' : `<span class="tag ${tipo}">${TAGS[tipo]}</span>`}<button class="mv" type="button" data-mov="${esc(it.ref)}" aria-label="Mover: ${esc(it.texto)}" title="Mover de hora o de día"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></button><button class="x" type="button" data-del="${esc(it.ref)}" aria-label="Sacar: ${esc(it.texto)}" title="Sacar de la lista">×</button></span>`;
+  return `<li class="it${done ? ' done' : ''}${ro ? ' ro' : ''}${justRef === it.ref ? ' just' : ''}"><button class="ck" type="button" data-ref="${esc(it.ref)}" aria-pressed="${done}" aria-label="${done ? 'Desmarcar' : 'Marcar'}: ${esc(it.texto)}"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></button><div><button class="t" type="button" data-ref="${esc(it.ref)}">${esc(it.texto)}</button>${sub}${form}</div>${right}</li>`;
 }
 
 function renderHoy(){
-  const bs = bloques();
+  const v = curVista(), bs = bloques(v);
   const box = $('bloques');
+  const seg = $('vista-seg'); seg.hidden = !hasManana();
+  seg.querySelectorAll('[data-vista]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.vista === v)));
+  $('h-hoy').textContent = v === 'manana' ? 'Mañana' : 'Hoy';
+  const its = bs.flatMap(b => b.items), dn = its.filter(isDone).length;
+  $('hoy-cnt').textContent = v === 'manana' ? fmtD(manana.fecha, {weekday:'short', day:'numeric'}) : (its.length ? `${dn}/${its.length}` : '');
+  const nota = $('vista-nota'); nota.hidden = v !== 'manana';
+  if (v === 'manana') nota.textContent = (manana.foco ? 'Foco: ' + manana.foco + ' · ' : '') + 'Lo que te propone tu socio. Movelo o sacalo: a las 7:45 queda como tu lista.';
+  $('add-in').placeholder = v === 'manana' ? 'Agregar algo para mañana' : 'Agregar algo para hoy';
   // conservar lo que se está escribiendo en un formulario abierto
   const typed = {}; box.querySelectorAll('.inl input').forEach(i => { typed[i.id] = i.value; });
   const hadFocus = document.activeElement && document.activeElement.id;
@@ -901,7 +992,7 @@ function renderFoot(){
 }
 
 function render(){
-  renderTop(allItems());
+  renderTop(allItems('hoy'));
   renderHoy(); renderNegocio(); renderMetas(); renderPlata(); renderFinales(); renderSemana(); renderDieta(); renderSocio(); renderFoot();
 }
 
@@ -909,33 +1000,46 @@ function render(){
 document.addEventListener('click', e => {
   if (e.target.closest('[data-more]')){ showAllAlerts = !showAllAlerts; render(); return; }
   if (e.target.closest('[data-cancel]')){ openRef = null; render(); return; }
+  const vb = e.target.closest('[data-vista]');
+  if (vb){ vista = vb.dataset.vista; movRef = null; openRef = null; render(); return; }
+  if (e.target.closest('[data-mov-cancel]')){ movRef = null; render(); return; }
+  if (e.target.closest('[data-mov-clear]')){ const f = e.target.closest('form'); guardarMov(f.dataset.ref, f.dataset.mf, '', ''); return; }
+  const mvb = e.target.closest('[data-mov]');
+  if (mvb){ movRef = movRef === mvb.dataset.mov ? null : mvb.dataset.mov; openRef = null; render(); setTimeout(() => { const i = $('mv-h'); if (i) i.focus(); }, 30); return; }
   if (e.target.closest('[data-cancel-meta]')){ editMeta = null; render(); return; }
   const siempre = e.target.closest('[data-siempre]');
   if (siempre){ const f = siempre.closest('form'); openRef = null; setTick(f.dataset.ref, true, 'Lo de siempre'); msg('Anotado. Lo cargo en Mini Cut en la próxima sincronización.', 'ok'); return; }
   const undo = e.target.closest('[data-undo]');
   if (undo){
-    const ref = undo.dataset.undo, doc = ticksDoc();
-    if (ref.startsWith('nueva:') && lastDel && lastDel.ref === ref){
-      const n = lastDel.n;
+    const ref = undo.dataset.undo;
+    if (lastDel && lastDel.ref === ref && lastDel.n){
+      const n = lastDel.n, doc = ticksDoc(lastDel.f);
       saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.concat([n])}), d => { if (!d.nuevas.some(x => x && x.id === n.id)) d.nuevas.push(n); });
-    } else saveTicks(Object.assign({}, doc, {ocultos: doc.ocultos.filter(r => r !== ref)}), d => { d.ocultos = d.ocultos.filter(r => r !== ref); });
+    } else {
+      const doc = ticksDoc(lastDel && lastDel.ref === ref ? lastDel.f : undefined);
+      saveTicks(Object.assign({}, doc, {ocultos: doc.ocultos.filter(r => r !== ref)}), d => { d.ocultos = d.ocultos.filter(r => r !== ref); });
+    }
     lastDel = null; msg('Volvió a la lista.', 'ok');
     return;
   }
   const del = e.target.closest('[data-del]');
   if (del){
-    const ref = del.dataset.del, doc = ticksDoc();
+    const ref = del.dataset.del, v = curVista();
+    const it = allItems(v).find(i => i.ref === ref) || {_f: dateOf(v), _mf: dateOf(v)};
     if (openRef === ref) openRef = null;
-    if (ref.startsWith('nueva:')){
+    if (movRef === ref) movRef = null;
+    const home = ticksDoc(it._mf);
+    if (ref.startsWith('nueva:') && it._mf === it._f && home.nuevas.some(n => n.id === ref.slice(6))){
       const id = ref.slice(6);
-      lastDel = {ref, n: doc.nuevas.find(n => n.id === id)};
-      saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.filter(n => n.id !== id)}), d => { d.nuevas = d.nuevas.filter(n => !n || n.id !== id); });
+      lastDel = {ref, f: it._mf, n: home.nuevas.find(n => n.id === id)};
+      saveTicks(Object.assign({}, home, {nuevas: home.nuevas.filter(n => n.id !== id)}), d => { d.nuevas = d.nuevas.filter(n => !n || n.id !== id); });
     } else {
-      lastDel = {ref};
+      const doc = ticksDoc(it._f);
+      lastDel = {ref, f: it._f};
       saveTicks(Object.assign({}, doc, {ocultos: doc.ocultos.filter(r => r !== ref).concat([ref])}), d => { d.ocultos = d.ocultos.filter(r => r !== ref).concat([ref]); });
     }
     const m = $('msg'); m.className = 'msg';
-    m.innerHTML = `Lo saqué de hoy.<button class="undo" type="button" data-undo="${esc(ref)}">Deshacer</button>`;
+    m.innerHTML = `Lo saqué de ${v === 'manana' ? 'mañana' : 'hoy'}.<button class="undo" type="button" data-undo="${esc(ref)}">Deshacer</button>`;
     return;
   }
   const ed = e.target.closest('[data-edit]');
@@ -957,6 +1061,13 @@ document.addEventListener('submit', e => {
     saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.concat([nueva])}), d => { d.nuevas.push(nueva); });
     $('add-in').value = ''; $('add-hora').value = '';
     msg(hora ? (avOn ? `Agregado. Te aviso a las ${hora}.` : `Agregado para las ${hora}. Activá los avisos arriba para que te llegue al celu.`) : 'Agregado. Lo creo en Routly en la próxima sincronización.', 'ok');
+    return;
+  }
+  if (f.dataset.form === 'mov'){
+    const h = /^\d{2}:\d{2}$/.test($('mv-h').value) ? $('mv-h').value : '';
+    const dEl = $('mv-d'), d = dEl && /^\d{4}-\d{2}-\d{2}$/.test(dEl.value) ? dEl.value : '';
+    if (d && d < listDate()){ msg('Elegí hoy o un día que viene.', 'err'); return; }
+    guardarMov(f.dataset.ref, f.dataset.mf, h, d);
     return;
   }
   if (f.dataset.form === 'kg'){
@@ -1248,8 +1359,8 @@ function subscribeAll(){
     plata = p; pagos = g && g.items ? g : {items:{}}; loaded.p = true; render();
   });
   db.collection('cerebro').onSnapshot(snap => {
-    let e = null; snap.docs.forEach(d => { if (d.id === 'estado') e = d.data(); if (d.id === 'socio') socio = d.data(); });
-    estado = e; loaded.e = true; render();
+    let e = null, mn = null; snap.docs.forEach(d => { if (d.id === 'estado') e = d.data(); if (d.id === 'socio') socio = d.data(); if (d.id === 'manana') mn = d.data(); });
+    estado = e; manana = mn; loaded.e = true; render();
   });
   db.collection('ticks').onSnapshot(snap => {
     const all = {}; snap.docs.forEach(d => { all[d.id] = d.data() || {}; });
