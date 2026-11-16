@@ -356,6 +356,10 @@ body:has(.login:not([hidden])){overflow:hidden}
 .sug:hover{background:rgba(var(--fg-rgb),.2)}
 .jvp-f{border-top:1px solid var(--line);padding:10px 10px 8px;display:grid;gap:6px}
 .jvp-row{display:flex;gap:6px;align-items:flex-end}
+.jvp-row textarea{flex:1}
+.jvp-acts{display:flex;gap:8px}
+.jvp-acts .btn{flex:1;padding:10px 12px}
+.jvp-acts .btn:disabled{opacity:.45;cursor:default}
 .jvp textarea{flex:1;min-width:0;resize:none;font:inherit;font-size:16px;line-height:1.35;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;height:42px;max-height:130px}
 .jvp textarea::placeholder{color:var(--ph)}
 .ib{flex:none;width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
@@ -490,14 +494,17 @@ body:has(.login:not([hidden])){overflow:hidden}
 <section class="jvp" id="jvp" role="dialog" aria-labelledby="jvp-t" hidden>
   <div class="jvp-h">
     <span class="jv-orb" aria-hidden="true"></span><h2 id="jvp-t">Tu socio</h2>
-    <a id="jvp-full" href="#" target="_blank" rel="noopener">Hablar en Claude ↗</a>
+    <a id="jvp-full" href="#" target="_blank" rel="noopener">Abrir Claude ↗</a>
     <button class="jvp-x" id="jvp-x" type="button" aria-label="Cerrar el chat">×</button>
   </div>
   <div class="jvp-log" id="jvp-log" aria-live="polite"></div>
   <form class="jvp-f" id="jvp-form" autocomplete="off">
     <div class="jvp-row">
       <textarea id="jvp-in" rows="1" maxlength="800" placeholder="Contale a tu socio…" aria-label="Mensaje para tu socio"></textarea>
-      <button class="ib send" type="submit" id="jvp-send" aria-label="Enviar"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="jvp-acts">
+      <button class="btn" type="button" id="jvp-now">Hablar ahora</button>
+      <button class="btn soft" type="submit" id="jvp-send">Anotar</button>
     </div>
     <p class="jvp-q" id="jvp-q"></p>
   </form>
@@ -1111,7 +1118,27 @@ document.addEventListener('submit', e => {
 });
 
 /* ---------- Tu socio: notas (las procesa Claude) y chat en Claude ---------- */
-const PROYECTO = 'https://claude.ai/project/01a1dc67-0091-73cd-a6ab-7bda3fb50c01';
+const PROYECTO_ID = '01a1dc67-0091-73cd-a6ab-7bda3fb50c01';
+const PROYECTO = 'https://claude.ai/project/' + PROYECTO_ID;
+/* Hablar ahora: abre un chat nuevo en el proyecto CEREBRO con el texto ya escrito.
+   En el celu prueba la app de Claude (claude://) y, si no abre, va a la web. */
+function hablarAhora(text){
+  const q = String(text || '').trim().slice(0, 4000);
+  const qs = 'project=' + PROYECTO_ID + (q ? '&q=' + encodeURIComponent(q) : '');
+  if (q && navigator.clipboard) navigator.clipboard.writeText(q).catch(() => {});
+  const web = 'https://claude.ai/new?' + qs;
+  const movil = isIOS || /Android/i.test(navigator.userAgent);
+  if (movil){
+    let fue = false;
+    const onHide = () => { if (document.hidden) fue = true; };
+    document.addEventListener('visibilitychange', onHide);
+    setTimeout(() => { document.removeEventListener('visibilitychange', onHide); if (!fue) location.href = web; }, 1500);
+    location.href = 'claude://claude.ai/new?' + qs;
+  } else {
+    window.open(web, '_blank', 'noopener');
+  }
+  if (q){ $('jvp-in').value = ''; jvGrow(); }
+}
 const SYNC_H = [[7,45],[12,37],[18,37],[23,37]];
 let pedidosAll = [], jvBusy = false;
 
@@ -1149,7 +1176,7 @@ function renderJv(){
   badge.hidden = !pend; badge.textContent = pend;
   const q = $('jvp-q');
   q.className = 'jvp-q';
-  q.textContent = pend ? `${pend} en cola · tu socio lo procesa a las ${proxSync()}` : `Tu socio lo lee a las ${proxSync()}. ¿Es urgente? Hablale en Claude.`;
+  q.textContent = pend ? `${pend} anotado${pend > 1 ? 's' : ''} · lo carga a las ${proxSync()}` : `Hablar ahora: te responde al instante. Anotar: lo carga a las ${proxSync()}.`;
   $('jvp-send').disabled = jvBusy;
   if ($('jvp').hidden) return;
   const log = $('jvp-log');
@@ -1157,7 +1184,7 @@ function renderJv(){
   const ps = pedidosAll.filter(p => (Date.parse(p.en) || 0) >= desde).sort((a, b) => (Date.parse(a.en) || 0) - (Date.parse(b.en) || 0)).slice(-25);
   let html = '';
   if (!ps.length){
-    html = `<div class="jvp-empty"><p>Contale qué hiciste, qué comiste, qué pagaste o cómo te sentís. Tu socio lo procesa en la próxima pasada y te responde acá. Si es urgente, tocá "Hablar en Claude".</p><div class="sugs">${['Hice cardio', 'Me pesé 86,1', 'Pagué la luz', 'Hoy no tengo ganas', 'Comí 2 empanadas'].map(x => `<button class="sug" type="button" data-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`;
+    html = `<div class="jvp-empty"><p><b>Hablar ahora</b>: lo que sea, te responde al instante (se abre Claude con lo que escribiste). <b>Anotar</b>: lo que hiciste, comiste o pagaste; lo carga en la próxima pasada y te responde acá.</p><div class="sugs">${['Hice cardio', 'Me pesé 86,1', 'Pagué la luz', 'Hoy no tengo ganas', 'Comí 2 empanadas'].map(x => `<button class="sug" type="button" data-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`;
   } else {
     html = ps.map(p => {
       let st = '';
@@ -1180,6 +1207,8 @@ function jvOpen(open){
 function jvGrow(){ const t = $('jvp-in'); t.style.height = '42px'; t.style.height = Math.min(130, t.scrollHeight + 2) + 'px'; }
 
 $('jvp-full').href = PROYECTO;
+$('jvp-full').addEventListener('click', e => { e.preventDefault(); hablarAhora(''); });
+$('jvp-now').addEventListener('click', () => hablarAhora($('jvp-in').value));
 $('jv-fab').addEventListener('click', () => jvOpen(true));
 $('jvp-x').addEventListener('click', () => jvOpen(false));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('jvp').hidden) jvOpen(false); });
