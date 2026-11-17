@@ -626,6 +626,21 @@ let openRef = null, editMeta = null, justRef = null, writeChain = Promise.resolv
 
 /* ---------- Estado derivado ---------- */
 let manana = null, vista = 'hoy', movRef = null;
+let estadoRaw = null, mananaRaw = null, diaVisto = '';
+// Desde las 00:01 el plan que armó tu socio para hoy (cerebro/manana) ya es la lista de hoy,
+// aunque la corrida de las 7:45 todavía no haya pasado. Lo que tachás queda en ticks/{hoy}.
+function armarDia(){
+  const hoy = today(), e = estadoRaw, mn = mananaRaw;
+  diaVisto = hoy;
+  const usaPlan = mn && mn.fecha === hoy && Array.isArray(mn.bloques) && mn.bloques.length && !(e && e.fecha >= hoy);
+  if (!usaPlan){ estado = e; manana = mn; return; }
+  const base = e || {};
+  const dieta = mn.dieta || (base.dieta ? Object.assign({}, base.dieta, {dia: hoy, kcal: 0, nota: ''}) : undefined);
+  estado = Object.assign({}, base, {fecha: hoy, generado: mn.generado, saludo: mn.saludo, foco: mn.foco, alertas: mn.alertas || [], bloques: mn.bloques, avisos: mn.avisos || [], nuevas_sincronizadas: mn.nuevas_sincronizadas || [], dieta, _plan: true});
+  manana = null;
+}
+setInterval(() => { if (estadoRaw && today() !== diaVisto) render(); }, 60e3);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && estadoRaw && today() !== diaVisto) render(); });
 const listDate = () => (estado && estado.fecha) || today();
 const hasManana = () => !!(manana && manana.fecha && manana.fecha > listDate() && Array.isArray(manana.bloques) && manana.bloques.length);
 const curVista = () => (vista === 'manana' && hasManana()) ? 'manana' : 'hoy';
@@ -794,7 +809,7 @@ function renderTop(items){
   const esHoy = estado && estado.fecha === today();
   $('jarvis').textContent = estado
     ? (esHoy && estado.saludo ? estado.saludo : (done === total && total ? 'Lista cerrada. Así se construye el 1%.' : 'Acá tenés lo pendiente. Vamos con lo próximo.'))
-    : (loaded.e ? 'Tu primera lista llega mañana a las 7:45.' : (db ? 'Conectando con tu Cerebro…' : 'Iniciá sesión para ver tus datos.'));
+    : (loaded.e ? 'Tu primera lista la arma tu socio a las 00:01.' : (db ? 'Conectando con tu Cerebro…' : 'Iniciá sesión para ver tus datos.'));
   const foco = estado && estado.foco;
   $('foco').hidden = !foco; $('foco-t').textContent = foco || '';
   const all = (estado && Array.isArray(estado.alertas)) ? estado.alertas : [];
@@ -804,7 +819,7 @@ function renderTop(items){
   const b = $('banner');
   if (estado && estado.fecha && estado.fecha !== today()){
     b.hidden = false;
-    b.textContent = `Esta es la lista del ${fmtD(estado.fecha, {weekday:'long', day:'numeric', month:'long'})}. La de hoy llega a las 7:45.`;
+    b.textContent = `Esta es la lista del ${fmtD(estado.fecha, {weekday:'long', day:'numeric', month:'long'})}. La de hoy aparece cuando tu socio la arma a las 00:01.`;
   } else b.hidden = true;
 }
 
@@ -844,13 +859,13 @@ function renderHoy(){
   const its = bs.flatMap(b => b.items), dn = its.filter(isDone).length;
   $('hoy-cnt').textContent = v === 'manana' ? fmtD(manana.fecha, {weekday:'short', day:'numeric'}) : (its.length ? `${dn}/${its.length}` : '');
   const nota = $('vista-nota'); nota.hidden = v !== 'manana';
-  if (v === 'manana') nota.textContent = (manana.foco ? 'Foco: ' + manana.foco + ' · ' : '') + 'Lo que te propone tu socio. Movelo o sacalo: a las 7:45 queda como tu lista.';
+  if (v === 'manana') nota.textContent = (manana.foco ? 'Foco: ' + manana.foco + ' · ' : '') + 'Lo que te propone tu socio. Movelo o sacalo: a las 00:01 pasa a ser tu lista de hoy.';
   $('add-in').placeholder = v === 'manana' ? 'Agregar algo para mañana' : 'Agregar algo para hoy';
   // conservar lo que se está escribiendo en un formulario abierto
   const typed = {}; box.querySelectorAll('.inl input').forEach(i => { typed[i.id] = i.value; });
   const hadFocus = document.activeElement && document.activeElement.id;
   if (!bs.length){
-    box.innerHTML = `<p class="empty">${loaded.e ? 'No hay lista para este día. La próxima llega a las 7:45.' : (db ? 'Cargando tu lista…' : 'Iniciá sesión para ver tu lista.')}</p>`;
+    box.innerHTML = `<p class="empty">${loaded.e ? 'No hay lista para este día. La próxima la arma tu socio a las 00:01.' : (db ? 'Cargando tu lista…' : 'Iniciá sesión para ver tu lista.')}</p>`;
   } else {
     box.innerHTML = bs.map(b => {
       const d = b.items.filter(isDone).length, full = d === b.items.length;
@@ -994,6 +1009,7 @@ function renderFoot(){
 }
 
 function render(){
+  armarDia();
   renderTop(allItems('hoy'));
   renderHoy(); renderNegocio(); renderMetas(); renderPlata(); renderFinales(); renderSemana(); renderDieta(); renderSocio(); renderFoot();
 }
@@ -1395,7 +1411,7 @@ function subscribeAll(){
   });
   db.collection('cerebro').onSnapshot(snap => {
     let e = null, mn = null; snap.docs.forEach(d => { if (d.id === 'estado') e = d.data(); if (d.id === 'socio') socio = d.data(); if (d.id === 'manana') mn = d.data(); });
-    estado = e; manana = mn; loaded.e = true; render();
+    estadoRaw = e; mananaRaw = mn; loaded.e = true; render();
   });
   db.collection('ticks').onSnapshot(snap => {
     const all = {}; snap.docs.forEach(d => { all[d.id] = d.data() || {}; });
