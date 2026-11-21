@@ -260,8 +260,9 @@ section[id]{scroll-margin-top:16px}
 .nv.on{background:var(--accent-dim);color:var(--fg)}
 .nv.on svg{color:var(--accent)}
 .nv svg,.tb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.tab-bar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:grid;grid-template-columns:repeat(6,1fr);background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
-.tb{all:unset;display:grid;justify-items:center;gap:3px;padding:6px 0;border-radius:12px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer}
+.tab-bar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tb{all:unset;flex:0 0 auto;min-width:66px;display:grid;justify-items:center;gap:3px;padding:6px 4px;border-radius:12px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer}
+.tab-bar::-webkit-scrollbar{display:none}
 .tb.on{color:var(--accent)}
 @media (min-width:1180px){
   body{padding-left:228px}
@@ -327,7 +328,7 @@ body:has(.login:not([hidden])){overflow:hidden}
 .jv-fab:active{transform:scale(.97)}
 .jv-badge{font:600 12px var(--f-display);background:var(--warn);color:#1A1203;border-radius:999px;padding:1px 7px}
 .jvp{position:fixed;right:22px;bottom:22px;z-index:60;width:min(420px,calc(100vw - 24px));height:min(640px,calc(100vh - 44px));background:var(--panel);border:1px solid rgba(var(--fg-rgb),.4);border-radius:18px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;box-shadow:0 24px 64px var(--shadow);overflow:hidden}
-.jvp[hidden]{display:none}
+.jvp[hidden],.jv-fab[hidden]{display:none}
 .jvp-h{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px;border-bottom:1px solid var(--line)}
 .jvp-h .jv-orb{width:22px;height:22px}
 .jvp-h h2{font-size:16px}
@@ -538,6 +539,34 @@ select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1
   .wd{min-height:0}
 }
 @media (max-width:560px){.per .pl{min-width:0;flex:1}.per{width:100%}}
+/* Páginas propias: el panel del dashboard se muda a su página */
+.pgbody{display:grid;gap:22px;align-content:start}
+.pgbody .linkb.abrir,.pgbody .ph h2#h-fin,.pgbody .ph h2#h-neg,.pgbody .ph h2#h-metas,.pgbody .ph h2#h-socio{display:none}
+#pg-socio .socio{grid-template-columns:1fr}
+#pg-socio .clamp2{display:block;-webkit-line-clamp:unset;overflow:visible}
+.jvp.inl{position:static;width:auto;height:min(620px,72vh);z-index:auto;border-color:var(--line);box-shadow:none}
+.jvp.inl .jvp-x{display:none}
+/* Rueda de la vida */
+.rgrid{display:grid;gap:14px}
+.rradar svg{width:100%;max-width:420px;height:auto;display:block;margin:0 auto;font-family:var(--f-body)}
+.rside{display:grid;gap:10px}
+.rsum{display:grid;gap:12px}
+.rfoco{display:grid;gap:2px;border-left:3px solid var(--accent);background:var(--accent-dim);padding:10px 12px;border-radius:0 10px 10px 0;font-size:14px}
+.rfoco b{font-size:16px}
+.rfoco span:last-child{color:var(--dim-fg)}
+.rlist{display:grid}
+.rrow{display:grid;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+.rtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rtop b{font-weight:700;margin-right:auto}
+.rprev{font-size:12.5px;color:var(--muted)}
+.rdato{font-size:13px;color:var(--muted)}
+.rbtns{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;max-width:420px}
+.rbtns button{all:unset;cursor:pointer;text-align:center;font-size:12.5px;font-weight:700;padding:6px 0;border-radius:7px;background:var(--track);color:var(--muted)}
+.rbtns button.on{background:rgba(var(--fg-rgb),.22);color:var(--fg)}
+.rbtns button.cur{background:var(--inv-bg);color:var(--inv-fg)}
+.rbtns button:focus-visible{outline:2px solid var(--accent)}
+.rnota{margin:0;justify-self:start;font-size:13.5px;color:var(--dim-fg);text-align:left}
+.rtxt{font-size:15px;line-height:1.45}
 /* Dieta */
 .dnav{flex-wrap:wrap}
 .dnav .pl{display:grid;gap:0;line-height:1.25}
@@ -603,24 +632,27 @@ select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1
 <body>
 <nav class="side-nav" aria-label="Secciones">
   <div class="brand"><span class="jv-orb" aria-hidden="true"></span><span>Cerebro</span></div>
-  <button class="nv" type="button" data-go="sec-top"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><span>Hoy</span></button>
+  <button class="nv" type="button" data-page="inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><span>Hoy</span></button>
   <button class="nv" type="button" data-page="tareas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4M8.5 14.5l2 2 4-4"/></svg><span>Tareas</span></button>
   <button class="nv" type="button" data-page="habitos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2.2 1.2-3.5 2.3-4.5 0 2 1 3.2 2.2 3.2 0-3.4-1-5.4 0-8.2z"/></svg><span>Hábitos</span></button>
   <button class="nv" type="button" data-page="dieta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v7a2 2 0 0 0 4 0V3M9 12v9M17 3c-2 0-3.2 3-3.2 6.2 0 2.4 1.2 3.8 3.2 3.8v8"/></svg><span>Dieta</span></button>
-  <button class="nv" type="button" data-go="sec-neg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M11 20V5M17 20v-5M3 20h18"/></svg><span>Negocio</span></button>
-  <button class="nv" type="button" data-go="sec-metas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/></svg><span>Metas</span></button>
-  <button class="nv" type="button" data-go="sec-fin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.2V16c3 2 7 2 10 0v-4.8"/></svg><span>Finales</span></button>
+  <button class="nv" type="button" data-page="finales"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.2V16c3 2 7 2 10 0v-4.8"/></svg><span>Finales</span></button>
   <button class="nv" type="button" data-page="finanzas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 14.5h2"/></svg><span>Finanzas</span></button>
-  <button class="nv" type="button" data-go="sec-socio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.6L18.4 9l-4.6 1.4L12 15l-1.8-4.6L5.6 9l4.6-1.4z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Tu socio</span></button>
+  <button class="nv" type="button" data-page="negocio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M11 20V5M17 20v-5M3 20h18"/></svg><span>Negocio</span></button>
+  <button class="nv" type="button" data-page="metas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/></svg><span>Metas</span></button>
+  <button class="nv" type="button" data-page="socio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.6L18.4 9l-4.6 1.4L12 15l-1.8-4.6L5.6 9l4.6-1.4z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Tu socio</span></button>
   <button class="salir" type="button" id="salir">Cerrar sesión</button>
 </nav>
 <nav class="tab-bar" aria-label="Secciones">
-  <button class="tb" type="button" data-go="sec-top"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><span>Hoy</span></button>
+  <button class="tb" type="button" data-page="inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><span>Hoy</span></button>
   <button class="tb" type="button" data-page="tareas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4M8.5 14.5l2 2 4-4"/></svg><span>Tareas</span></button>
   <button class="tb" type="button" data-page="habitos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2.2 1.2-3.5 2.3-4.5 0 2 1 3.2 2.2 3.2 0-3.4-1-5.4 0-8.2z"/></svg><span>Hábitos</span></button>
   <button class="tb" type="button" data-page="dieta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v7a2 2 0 0 0 4 0V3M9 12v9M17 3c-2 0-3.2 3-3.2 6.2 0 2.4 1.2 3.8 3.2 3.8v8"/></svg><span>Dieta</span></button>
+  <button class="tb" type="button" data-page="finales"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.2V16c3 2 7 2 10 0v-4.8"/></svg><span>Finales</span></button>
   <button class="tb" type="button" data-page="finanzas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 14.5h2"/></svg><span>Finanzas</span></button>
-  <button class="tb" type="button" data-go="sec-socio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.6L18.4 9l-4.6 1.4L12 15l-1.8-4.6L5.6 9l4.6-1.4z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Socio</span></button>
+  <button class="tb" type="button" data-page="negocio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M11 20V5M17 20v-5M3 20h18"/></svg><span>Negocio</span></button>
+  <button class="tb" type="button" data-page="metas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/></svg><span>Metas</span></button>
+  <button class="tb" type="button" data-page="socio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.6L18.4 9l-4.6 1.4L12 15l-1.8-4.6L5.6 9l4.6-1.4z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Socio</span></button>
 </nav>
 <div class="wrap" id="pg-inicio">
   <section class="top" id="sec-top" aria-label="Resumen del día">
@@ -659,24 +691,24 @@ select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1
     </section>
 
     <section class="panel" id="sec-diet" aria-labelledby="h-diet">
-      <div class="ph"><h2 id="h-diet">Dieta</h2><span class="lbl" id="diet-dia"></span></div>
+      <div class="ph"><h2 id="h-diet">Dieta</h2><span class="lbl" id="diet-dia"></span><button class="linkb abrir" type="button" data-page="dieta" style="margin-left:0">Abrir</button></div>
       <div id="dieta"><p class="empty">Cargando dieta…</p></div>
     </section>
 
     <section class="panel" id="sec-neg" aria-labelledby="h-neg">
-      <div class="ph"><h2 id="h-neg">Negocio</h2><span class="lbl" id="neg-upd"></span></div>
+      <div class="ph"><h2 id="h-neg">Negocio</h2><span class="lbl" id="neg-upd"></span><button class="linkb abrir" type="button" data-page="negocio" style="margin-left:0">Abrir</button></div>
       <div id="negocio" style="display:grid;gap:18px"><p class="empty">Cargando números…</p></div>
     </section>
     </div>
 
     <div class="side">
       <section class="panel" id="sec-metas" aria-labelledby="h-metas">
-        <div class="ph"><h2 id="h-metas">Metas</h2><span class="lbl">Avance</span></div>
+        <div class="ph"><h2 id="h-metas">Metas</h2><span class="lbl">Avance</span><button class="linkb abrir" type="button" data-page="metas" style="margin-left:0">Abrir</button></div>
         <div id="metas"><p class="empty">Cargando metas…</p></div>
       </section>
 
       <section class="panel" id="sec-fin" aria-labelledby="h-fin">
-        <div class="ph"><h2 id="h-fin">Finales</h2><span class="lbl num" id="fin-cnt"></span></div>
+        <div class="ph"><h2 id="h-fin">Finales</h2><span class="lbl num" id="fin-cnt"></span><button class="linkb abrir" type="button" data-page="finales" style="margin-left:0">Abrir</button></div>
         <div class="fins" id="finales"><p class="empty">Cargando finales…</p></div>
       </section>
 
@@ -688,7 +720,7 @@ select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1
   </div>
 
   <section class="panel" id="sec-socio" aria-labelledby="h-socio">
-    <div class="ph"><h2 id="h-socio">Tu socio</h2><span class="lbl" id="socio-upd"></span></div>
+    <div class="ph"><h2 id="h-socio">Tu socio</h2><span class="lbl" id="socio-upd"></span><button class="linkb abrir" type="button" data-page="socio" style="margin-left:0">Abrir</button></div>
     <div class="socio" id="socio"><p class="empty">Cargando…</p></div>
   </section>
 
@@ -717,6 +749,30 @@ select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1
   <div class="pgh" id="f-per"><div class="per"><button class="nb" type="button" data-fnav="-1" aria-label="Mes anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="pl" id="f-lbl" aria-live="polite"></span><button class="nb" type="button" data-fnav="1" aria-label="Mes siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button><button class="btn ghost sm" type="button" data-fnav="0">Este mes</button></div></div>
   <p class="msg" id="f-msg" role="status" aria-live="polite"></p>
   <div id="finanzas" style="display:grid;gap:22px"><p class="empty">Cargando tus finanzas…</p></div>
+</div>
+
+<div class="wrap" id="pg-finales" hidden>
+  <div class="pgh"><h1>Finales</h1></div>
+  <div class="pgbody" id="pgb-finales"></div>
+</div>
+
+<div class="wrap" id="pg-negocio" hidden>
+  <div class="pgh"><h1>Negocio</h1></div>
+  <div class="pgbody" id="pgb-negocio"></div>
+</div>
+
+<div class="wrap" id="pg-metas" hidden>
+  <div class="pgh"><h1>Metas</h1></div>
+  <div class="pgbody" id="pgb-metas"></div>
+</div>
+
+<div class="wrap" id="pg-socio" hidden>
+  <div class="pgh"><h1>Tu socio</h1></div>
+  <p class="msg" id="s-msg" role="status" aria-live="polite"></p>
+  <div class="tcols">
+    <div class="side pgbody"><div id="pgb-socio-a"></div><div id="pgb-socio-r"></div></div>
+    <div class="side pgbody"><div id="pgb-socio-b"></div><div id="pgb-socio-s"></div></div>
+  </div>
 </div>
 
 <div class="wrap" id="pg-dieta" hidden>
@@ -1302,7 +1358,7 @@ function render(){
   armarDia();
   renderTop(allItems('hoy'));
   renderHoy(); renderNegocio(); renderMetas(); renderPlata(); renderFinales(); renderSemana(); renderDieta(); renderSocio(); renderFoot();
-  if (page === 'tareas') renderTareas(); else if (page === 'habitos') renderHabitos(); else if (page === 'finanzas') renderFinanzas(); else if (page === 'dieta') renderDietaPg();
+  if (page === 'tareas') renderTareas(); else if (page === 'habitos') renderHabitos(); else if (page === 'finanzas') renderFinanzas(); else if (page === 'dieta') renderDietaPg(); else if (page === 'socio') renderSocioPg();
 }
 
 /* ---------- Eventos ---------- */
@@ -1446,7 +1502,7 @@ document.addEventListener('submit', e => {
 });
 
 /* ---------- Módulos: tareas, plan del día y hábitos (tablas propias del Cerebro) ---------- */
-const M = {ok: false, err: false, tasks: [], projects: [], blocks: [], bd: new Map(), habits: [], hl: new Set(), fin: {items: [], movs: [], cuentas: [], cmovs: [], cot: []}, diet: {items: [], dias: [], pesos: [], fotos: []}};
+const M = {ok: false, err: false, tasks: [], projects: [], blocks: [], bd: new Map(), habits: [], hl: new Set(), fin: {items: [], movs: [], cuentas: [], cmovs: [], cot: []}, diet: {items: [], dias: [], pesos: [], fotos: []}, wheel: []};
 let mChan = null, mChain = Promise.resolve(), mRaf = 0, page = 'inicio';
 const uuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
 const isoDow = f => { const d = new Date(f + 'T12:00:00').getDay(); return d === 0 ? 7 : d; };
@@ -1476,7 +1532,7 @@ async function selAll(t, cols, f){
 async function mLoad(){
   try {
     const desde = addDays(today(), -800);
-    const [tk, pj, bl, bd, hb, hl, fi, fm, fc, fcm, fco, di, dd, dp, df] = await Promise.all([
+    const [tk, pj, bl, bd, hb, hl, fi, fm, fc, fcm, fco, di, dd, dp, df, lw] = await Promise.all([
       selAll('tasks', 'id,titulo,fecha,completada,orden,project_id,minutos_estimados,premio,creado_en', q => q.eq('eliminado', false)),
       selAll('projects', 'id,nombre,color,orden', q => q.eq('eliminado', false)),
       selAll('plan_blocks', 'id,fecha,titulo,hora_inicio,hora_fin,completado,dias_semana,creado_en', q => q.eq('eliminado', false)),
@@ -1491,8 +1547,10 @@ async function mLoad(){
       selAll('diet_items', 'id,fecha,comida,alimento,cantidad,kcal,p,c,g,orden,origen,creado_en', q => q.eq('eliminado', false)),
       selAll('diet_dias', 'id,fecha,reco,nota', q => q.eq('eliminado', false)),
       selAll('diet_pesos', 'id,fecha,kg,nota', q => q.eq('eliminado', false)),
-      selAll('diet_fotos', 'id,fecha,path', q => q.eq('eliminado', false))
+      selAll('diet_fotos', 'id,fecha,path', q => q.eq('eliminado', false)),
+      selAll('life_wheel', 'id,mes,area,puntaje,nota', q => q.eq('eliminado', false))
     ]);
+    M.wheel = lw;
     M.diet = {items: di, dias: dd, pesos: dp, fotos: df};
     M.fin = {items: fi, movs: fm, cuentas: fc, cmovs: fcm, cot: fco};
     M.tasks = tk; M.projects = pj; M.blocks = bl; M.habits = hb;
@@ -1523,6 +1581,7 @@ function mListen(){
   on('diet_dias', r => up(M.diet.dias, r));
   on('diet_pesos', r => up(M.diet.pesos, r));
   on('diet_fotos', r => up(M.diet.fotos, r));
+  on('life_wheel', r => up(M.wheel, r));
   mChan = ch.subscribe();
 }
 function mFail(e){
@@ -1686,11 +1745,12 @@ function agendaDia(f){
 }
 
 /* ---------- Páginas ---------- */
-const PAGES = {inicio: 'pg-inicio', tareas: 'pg-tareas', habitos: 'pg-habitos', finanzas: 'pg-finanzas', dieta: 'pg-dieta'};
+const PAGES = {inicio: 'pg-inicio', tareas: 'pg-tareas', habitos: 'pg-habitos', finanzas: 'pg-finanzas', dieta: 'pg-dieta', finales: 'pg-finales', negocio: 'pg-negocio', metas: 'pg-metas', socio: 'pg-socio'};
 function setPage(p, push){
   if (!PAGES[p]) p = 'inicio';
   page = p;
   Object.keys(PAGES).forEach(k => { $(PAGES[k]).hidden = k !== p; });
+  mudarPaneles(p);
   if (push !== false){
     const h = p === 'inicio' ? '' : '#' + p;
     if (location.hash !== h) history.pushState(null, '', h || (location.pathname + location.search));
@@ -1700,7 +1760,7 @@ function setPage(p, push){
 }
 window.addEventListener('popstate', () => setPage(location.hash.slice(1) || 'inicio', false));
 function pmsg(t, cls, extra){
-  const m = $({habitos: 'h-msg', finanzas: 'f-msg', dieta: 'd-msg'}[page] || 't-msg'); if (!m) return;
+  const m = $({habitos: 'h-msg', finanzas: 'f-msg', dieta: 'd-msg', socio: 's-msg'}[page] || 't-msg'); if (!m) return;
   m.className = 'msg' + (cls ? ' ' + cls : '');
   m.innerHTML = esc(t || '') + (extra || '');
 }
@@ -2696,6 +2756,156 @@ document.addEventListener('submit', async e => {
   }
 });
 
+/* ---------- Páginas propias para Finales, Negocio, Metas y Tu socio ---------- */
+// Los paneles de Inicio se mudan a su página cuando la abrís y vuelven al dashboard cuando volvés a Hoy.
+const MUDA = {finales: [['sec-fin', 'pgb-finales']], negocio: [['sec-neg', 'pgb-negocio']], metas: [['sec-metas', 'pgb-metas']], socio: [['sec-socio', 'pgb-socio-a']]};
+const casaDe = {};
+function mudarPaneles(p){
+  Object.keys(MUDA).forEach(pg => MUDA[pg].forEach(([id, dest]) => {
+    const el = $(id); if (!el) return;
+    if (!casaDe[id]){ const c = document.createComment(id); el.parentNode.insertBefore(c, el); casaDe[id] = c; }
+    if (p === pg){ const d = $(dest); if (d && el.parentNode !== d) d.insertBefore(el, d.firstChild); }
+    else if (el.previousSibling !== casaDe[id]) casaDe[id].parentNode.insertBefore(el, casaDe[id].nextSibling);
+  }));
+  // El chat con tu socio va adentro de su página; en las demás queda el botón "Hablemos"
+  const jv = $('jvp'), fab = $('jv-fab');
+  if (p === 'socio'){
+    const d = $('pgb-socio-b');
+    if (jv.parentNode !== d){ d.insertBefore(jv, d.firstChild); }
+    jv.classList.add('inl'); jv.hidden = false; fab.hidden = true;
+    renderJv();
+  } else if (jv.classList.contains('inl')){
+    jv.classList.remove('inl'); document.body.insertBefore(jv, fab.nextSibling); jv.hidden = true; fab.hidden = false;
+  }
+}
+
+/* Rueda de la vida: un puntaje del 1 al 10 por área, una vez por mes */
+const AREAS = [
+  {k: 'salud_deporte', n: 'Salud y deporte', s: 'Salud'},
+  {k: 'trabajo_finanzas', n: 'Trabajo y finanzas', s: 'Trabajo'},
+  {k: 'educativa_cultural', n: 'Estudio y cultura', s: 'Estudio'},
+  {k: 'emocional', n: 'Emocional', s: 'Emocional'},
+  {k: 'familia_amor', n: 'Familia y amor', s: 'Familia'},
+  {k: 'ocio_amistad', n: 'Amigos y ocio', s: 'Amigos'},
+  {k: 'tiempo_para_mi', n: 'Tiempo para mí', s: 'Para mí'},
+  {k: 'espiritual_etica', n: 'Espiritual y propósito', s: 'Propósito'}
+];
+let rMes = today().slice(0, 7), rNota = null;
+const rMesLabel = m => capi(fmtD(m + '-01', {month: 'long', year: 'numeric'}));
+const rDe = m => { const o = {}; M.wheel.filter(w => w.mes === m && w.puntaje != null).forEach(w => { o[w.area] = w; }); return o; };
+// El último mes con puntajes antes de m (para comparar)
+const rPrevMes = m => [...new Set(M.wheel.filter(w => w.mes < m && w.puntaje != null).map(w => w.mes))].sort().pop() || null;
+function rAvg(o){ const v = AREAS.map(a => o[a.k] && +o[a.k].puntaje).filter(x => x); return v.length ? v.reduce((s, x) => s + x, 0)/v.length : null; }
+// Lo que dicen tus datos de cada área (sale de la app, no del puntaje)
+function rDato(k){
+  try {
+    if (k === 'salud_deporte'){
+      const lunes = wkStart(today()), cnt = re => { const h = M.habits.find(x => re.test(x.nombre) && !x.archivado); if (!h) return null; let c = 0; for (let i = 0; i < 7; i++) if (hOn(h.id, addDays(lunes, i))) c++; return `${c}/${h.meta_semanal}`; };
+      const g = cnt(/gym/i), c = cnt(/cardio/i), P = [...dPesos()], last = P.length ? P[P.length - 1] : null;
+      return [g ? 'Gym ' + g : '', c ? 'cardio ' + c : '', last ? `${kgf(last[1], 1)} kg` : ''].filter(Boolean).join(' · ') + (g || c ? ' esta semana' : '');
+    }
+    if (k === 'trabajo_finanzas'){ const c = finCalc(today().slice(0, 7)); return c.hay ? `Te queda ${money(c.queda)} este mes` : ''; }
+    if (k === 'educativa_cultural'){
+      const f = ((estado && estado.finales) || []).filter(x => x.fecha >= today()).sort((a, b) => a.fecha.localeCompare(b.fecha))[0];
+      if (!f) return '';
+      const d = dayN(f.fecha) - dayN(today());
+      return `${f.titulo}: ${d === 0 ? 'hoy' : d === 1 ? 'mañana' : 'en ' + d + ' días'}`;
+    }
+  } catch (e) {}
+  return '';
+}
+function rRadar(cur, prev){
+  const N = AREAS.length, C = 160, R = 112, ang = i => -Math.PI/2 + i*2*Math.PI/N;
+  const pt = (i, v) => [C + Math.cos(ang(i))*R*v/10, C + Math.sin(ang(i))*R*v/10];
+  let g = '';
+  [2, 4, 6, 8, 10].forEach(v => { g += `<polygon points="${AREAS.map((a, i) => pt(i, v).map(n => n.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1"/>`; });
+  AREAS.forEach((a, i) => { const [x, y] = pt(i, 10); g += `<line x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--line)"/>`; });
+  const poly = (o, st) => { const ok = AREAS.some(a => o[a.k]); if (!ok) return ''; return `<polygon points="${AREAS.map((a, i) => pt(i, o[a.k] ? +o[a.k].puntaje : 0).map(n => n.toFixed(1)).join(',')).join(' ')}" ${st}/>`; };
+  g += poly(prev, 'fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"');
+  g += poly(cur, 'fill="rgba(var(--fg-rgb),.12)" stroke="var(--fg)" stroke-width="2.5" stroke-linejoin="round"');
+  AREAS.forEach((a, i) => { if (cur[a.k]){ const [x, y] = pt(i, +cur[a.k].puntaje); g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="var(--fg)"/>`; } });
+  AREAS.forEach((a, i) => {
+    const [x, y] = pt(i, 11.6), anc = Math.abs(x - C) < 8 ? 'middle' : x > C ? 'start' : 'end', v = cur[a.k] ? cur[a.k].puntaje : '–';
+    g += `<text x="${x.toFixed(1)}" y="${(y + 5).toFixed(1)}" text-anchor="${anc}" font-size="15" fill="var(--muted)">${esc(a.s)} <tspan fill="var(--fg)" font-weight="700">${v}</tspan></text>`;
+  });
+  return `<svg viewBox="-62 4 444 312" role="img" aria-label="Rueda de la vida">${g}</svg>`;
+}
+function rRuedaHtml(){
+  const cur = rDe(rMes), pm = rPrevMes(rMes), prev = pm ? rDe(pm) : {};
+  const avg = rAvg(cur), n = AREAS.filter(a => cur[a.k]).length;
+  const ambos = AREAS.filter(a => cur[a.k] && prev[a.k]);
+  const pavg = ambos.length >= 4 ? ambos.reduce((t, a) => t + (cur[a.k].puntaje - prev[a.k].puntaje), 0)/ambos.length : null;
+  const hoyM = today().slice(0, 7);
+  let resumen;
+  if (!n) resumen = `<p class="tipline">${rMes === hoyM ? `Todavía no puntuaste ${esc(fmtD(rMes + '-01', {month: 'long'}))}.` : 'Este mes no tiene puntajes.'} Del 1 al 10, ¿cómo estás en cada área? ${pm ? `La línea punteada es ${esc(fmtD(pm + '-01', {month: 'long'}))}.` : ''}</p>`;
+  else {
+    const ord = AREAS.filter(a => cur[a.k]).sort((a, b) => cur[a.k].puntaje - cur[b.k].puntaje);
+    const baja = ord[0], alta = ord[ord.length - 1];
+    const caidas = AREAS.filter(a => cur[a.k] && prev[a.k] && cur[a.k].puntaje < prev[a.k].puntaje).sort((a, b) => (cur[a.k].puntaje - prev[a.k].puntaje) - (cur[b.k].puntaje - prev[b.k].puntaje));
+    const nb = cur[baja.k].nota;
+    resumen = `<div class="rsum"><div class="kpi"><b class="num">${nf(avg, 1)}<small> / 10</small></b><span>Promedio${n < AREAS.length ? ` (${n} de ${AREAS.length})` : ''}${pavg != null ? ` · ${pavg >= 0 ? '+' : '−'}${nf(Math.abs(pavg), 1)} vs ${esc(fmtD(pm + '-01', {month: 'long'}))}` : ''}</span></div>
+      <div class="rfoco"><span class="lbl">Tu área a empujar</span><b>${esc(baja.n)} · ${cur[baja.k].puntaje}</b><span>${nb ? 'Para que sea un 10: ' + esc(nb) : 'Escribí abajo qué la haría un 10 y tu socio te va a empujar con eso.'}</span></div></div>
+      <p class="vnota">Lo más fuerte: ${esc(alta.n)} (${cur[alta.k].puntaje}).${caidas.length ? ` Bajó: ${caidas.slice(0, 2).map(a => `${esc(a.n)} (${prev[a.k].puntaje} → ${cur[a.k].puntaje})`).join(', ')}.` : ''}</p>`;
+  }
+  const filas = AREAS.map(a => {
+    const w = cur[a.k], p = prev[a.k], v = w ? +w.puntaje : null, dato = rDato(a.k);
+    const delta = v != null && p ? v - p.puntaje : null;
+    const nota = (w && w.nota) || (!w && p && p.nota) || '';
+    const ed = rNota === a.k;
+    return `<div class="rrow"><div class="rtop"><b>${esc(a.n)}</b>${delta ? `<span class="pill ${delta > 0 ? 'good' : 'warn'}">${delta > 0 ? '+' : '−'}${Math.abs(delta)}</span>` : ''}${p ? `<span class="rprev">antes ${p.puntaje}</span>` : ''}</div>
+      ${dato ? `<span class="rdato">${esc(dato)}</span>` : ''}
+      <div class="rbtns" role="group" aria-label="Puntaje de ${esc(a.n)}">${Array.from({length: 10}, (_, i) => i + 1).map(x => `<button type="button" class="${v != null && x <= v ? 'on' : ''}${x === v ? ' cur' : ''}" data-rset="${a.k}" data-v="${x}" aria-label="${x}" aria-pressed="${x === v}">${x}</button>`).join('')}</div>
+      ${ed ? `<form class="inl mvf" data-rform="${a.k}" autocomplete="off"><input id="rn-${a.k}" type="text" maxlength="200" placeholder="¿Qué haría que sea un 10?" value="${esc(nota)}"><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-rcancel>Cancelar</button></form>`
+        : `<button class="linkb rnota" type="button" data-rnota="${a.k}">${nota ? esc(nota) : '¿Qué haría que sea un 10?'}</button>`}
+    </div>`;
+  }).join('');
+  return `<section class="panel" id="rueda"><div class="ph"><h2>Rueda de la vida</h2><div class="per"><button class="nb" type="button" data-rnav="-1" aria-label="Mes anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="pl">${esc(rMesLabel(rMes))}</span><button class="nb" type="button" data-rnav="1" aria-label="Mes siguiente"${rMes >= hoyM ? ' disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div></div>
+    <div class="rgrid"><div class="rradar">${rRadar(cur, prev)}</div><div class="rside">${resumen}</div></div>
+    <div class="rlist">${filas}</div>
+    <p class="vnota">Una vez por mes, a conciencia. Tu socio usa la rueda para elegir en qué empujarte.</p></section>`;
+}
+function rSabeHtml(){
+  const s = socio || {};
+  const norte = Array.isArray(s.norte) ? s.norte : [], ver = Array.isArray(s.verdades) ? s.verdades : [];
+  if (!norte.length && !ver.length && !s.prioridades) return '';
+  return `<section class="panel"><div class="ph"><h2>Lo que tu socio tiene presente</h2></div>
+    ${norte.length ? `<div><p class="lbl">Tu norte</p><ul class="sl">${norte.map(x => `<li><span>${esc(x)}</span></li>`).join('')}</ul></div>` : ''}
+    ${s.prioridades ? `<div><p class="lbl">Prioridades</p><p class="rtxt">${esc(s.prioridades)}</p></div>` : ''}
+    ${ver.length ? `<div><p class="lbl">Verdades del momento</p><ul class="sl">${ver.map(x => `<li><span>${esc(x)}</span></li>`).join('')}</ul></div>` : ''}
+  </section>`;
+}
+function renderSocioPg(){
+  const a = $('pgb-socio-r'), b = $('pgb-socio-s');
+  if (!M.ok){ a.innerHTML = `<p class="empty">${M.err ? 'No pude traer tus datos. Revisá la conexión.' : 'Cargando…'}</p>`; return; }
+  keepTyping(a, () => { a.innerHTML = rRuedaHtml(); });
+  b.innerHTML = rSabeHtml();
+}
+function rSet(area, data){
+  const cur = M.wheel.find(w => w.mes === rMes && w.area === area);
+  if (cur) Object.assign(cur, data); else M.wheel.push(Object.assign({id: uuid(), mes: rMes, area, puntaje: null, nota: null}, data));
+  render();
+  const m = rMes;
+  mDo(() => sb.from('life_wheel').upsert(Object.assign({mes: m, area, eliminado: false}, data), {onConflict: 'mes,area'}));
+}
+document.addEventListener('click', e => {
+  if (page !== 'socio') return;
+  const q = s => e.target.closest(s);
+  let b;
+  if ((b = q('[data-rset]'))){ const v = +b.dataset.v, a = b.dataset.rset; const cur = rDe(rMes)[a]; const prev = rPrevMes(rMes) && rDe(rPrevMes(rMes))[a]; rSet(a, Object.assign({puntaje: v}, !cur && prev && prev.nota ? {nota: prev.nota} : {})); pmsg(`${AREAS.find(x => x.k === a).n}: ${v}.`, 'ok'); return; }
+  if ((b = q('[data-rnav]'))){ const n = +b.dataset.rnav; const nm = mesMas(rMes + '-01', n).slice(0, 7); if (nm <= today().slice(0, 7)){ rMes = nm; rNota = null; render(); } return; }
+  if ((b = q('[data-rnota]'))){ rNota = b.dataset.rnota; render(); setTimeout(() => { const i = $('rn-' + rNota); if (i) i.focus(); }, 30); return; }
+  if (q('[data-rcancel]')){ rNota = null; render(); return; }
+});
+document.addEventListener('submit', e => {
+  const f = e.target, a = f.dataset.rform;
+  if (!a || page !== 'socio') return;
+  e.preventDefault();
+  const t = ($('rn-' + a).value || '').trim().slice(0, 200);
+  rNota = null;
+  rSet(a, {nota: t || null});
+  pmsg('Guardado.', 'ok');
+});
+
 /* El panel "Plata" de Inicio y los ítems fijo:/compra:/venta: de la lista salen de estas tablas */
 function finRef(ref, mes){
   const [k, id] = String(ref).split(/:(.*)/s);
@@ -2920,7 +3130,7 @@ function jvGrow(){ const t = $('jvp-in'); t.style.height = '42px'; t.style.heigh
 $('jvp-full').href = PROYECTO;
 $('jv-fab').addEventListener('click', () => jvOpen(true));
 $('jvp-x').addEventListener('click', () => jvOpen(false));
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('jvp').hidden) jvOpen(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('jvp').hidden && !$('jvp').classList.contains('inl')) jvOpen(false); });
 $('jvp-form').addEventListener('submit', e => { e.preventDefault(); e.stopPropagation(); jvSend($('jvp-in').value); });
 $('jvp-in').addEventListener('input', jvGrow);
 $('jvp-in').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && window.matchMedia('(pointer:fine)').matches){ e.preventDefault(); jvSend($('jvp-in').value); } });
@@ -2939,23 +3149,11 @@ document.addEventListener('click', e => {
   const g = e.target.closest('[data-go]');
   if (g){ if (page !== 'inicio') setPage('inicio'); const el = $(g.dataset.go); if (el) (g.dataset.go === 'sec-top' ? window.scrollTo({top: 0, behavior: 'smooth'}) : el.scrollIntoView({behavior: 'smooth', block: 'start'})); return; }
 });
-let navTick = false;
 function navActive(){
-  navTick = false;
-  document.querySelectorAll('[data-page]').forEach(b => { if (b.classList.contains('nv') || b.classList.contains('tb')) b.classList.toggle('on', b.dataset.page === page); });
-  if (page !== 'inicio'){ document.querySelectorAll('.nv[data-go],.tb[data-go]').forEach(b => b.classList.remove('on')); return; }
-  const vis = NAV_IDS.map(id => $(id)).filter(el => el && el.offsetParent !== null);
-  let cur = 'sec-top';
-  const mid = window.innerHeight * 0.35;
-  vis.forEach(el => { if (el.getBoundingClientRect().top <= mid) cur = el.id; });
-  if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) cur = 'sec-socio';
-  const tabMap = {'sec-hab':'sec-top','sec-diet':'sec-top','sec-neg':'sec-top','sec-hoy':'sec-top','sec-metas':'sec-top','sec-fin':'sec-top'};
-  document.querySelectorAll('.nv[data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === cur));
-  const t = tabMap[cur] || cur;
-  document.querySelectorAll('.tb[data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === t));
+  document.querySelectorAll('.nv[data-page],.tb[data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === page));
+  const on = document.querySelector('.tb.on'), bar = document.querySelector('.tab-bar');
+  if (on && bar) bar.scrollTo({left: on.offsetLeft - bar.clientWidth/2 + on.offsetWidth/2, behavior: 'smooth'});
 }
-window.addEventListener('scroll', () => { if (page !== 'inicio') return; if (!navTick){ navTick = true; requestAnimationFrame(navActive); } }, {passive: true});
-window.addEventListener('resize', navActive);
 navActive();
 
 /* ---------- Modo claro de 6 a 18 h, oscuro el resto ---------- */
@@ -3193,7 +3391,14 @@ renderJv();
   const {data} = await sb.auth.getSession();
   if (data && data.session) startApp(); else showLogin();
 })();
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+if ('serviceWorker' in navigator){
+  const habia = !!navigator.serviceWorker.controller;
+  let recargo = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (habia && !recargo){ recargo = true; location.reload(); } });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(reg => {
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+  }).catch(() => {}));
+}
 </script>
 </body>
 </html>
