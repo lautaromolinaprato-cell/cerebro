@@ -544,8 +544,32 @@ select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1
 .pgbody .linkb.abrir,.pgbody .ph h2#h-fin,.pgbody .ph h2#h-neg,.pgbody .ph h2#h-metas,.pgbody .ph h2#h-socio{display:none}
 #pg-socio .socio{grid-template-columns:1fr}
 #pg-socio .clamp2{display:block;-webkit-line-clamp:unset;overflow:visible}
-.jvp.inl{position:static;width:auto;height:min(620px,72vh);z-index:auto;border-color:var(--line);box-shadow:none}
-.jvp.inl .jvp-x{display:none}
+.jvp.jvin{position:static;width:auto;height:min(660px,76vh);z-index:auto;border-color:var(--line);box-shadow:none;border-radius:18px}
+.jvp.jvin .jvp-x{display:none}
+.jvp.jvin .jvp-log{padding:18px 16px 8px;gap:10px}
+.bub b{font-weight:700}
+/* Hoy: solo lo importante (el detalle queda en cada página) */
+#pg-inicio .det,#pg-inicio .xtra,#pg-inicio #sec-socio{display:none}
+/* Recomendaciones con "Aplicar" */
+.recos li .rt{display:grid;gap:8px}
+.recos li.done .rtx{text-decoration:line-through;color:var(--muted)}
+.racts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+/* Tu coach */
+.coach{display:grid;gap:14px}
+.coach .ctx{font-size:16.5px;line-height:1.6;white-space:pre-wrap}
+.coach .ctx b{font-weight:700}
+/* Finanzas: gráficos de gastos */
+.fgraf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:center}
+@media (max-width:760px){.fgraf{grid-template-columns:1fr}}
+.donut{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;align-items:center}
+@media (max-width:420px){.donut{grid-template-columns:120px minmax(0,1fr)}}
+.donut svg{width:100%;height:auto;display:block}
+.dside{display:grid;gap:12px}
+.dleg2{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13.5px}
+.dleg2 li{display:flex;align-items:center;gap:8px}
+.dleg2 i{width:10px;height:10px;border-radius:3px;flex:none;border:1px solid var(--line)}
+.dleg2 span{flex:1;color:var(--dim-fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dleg2 b{font-weight:600}
 /* Rueda de la vida */
 .rgrid{display:grid;gap:14px}
 .rradar svg{width:100%;max-width:420px;height:auto;display:block;margin:0 auto;font-family:var(--f-body)}
@@ -753,16 +777,19 @@ select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1
 
 <div class="wrap" id="pg-finales" hidden>
   <div class="pgh"><h1>Finales</h1></div>
+  <p class="msg" id="fi-msg" role="status" aria-live="polite"></p>
   <div class="pgbody" id="pgb-finales"></div>
 </div>
 
 <div class="wrap" id="pg-negocio" hidden>
   <div class="pgh"><h1>Negocio</h1></div>
+  <p class="msg" id="n-msg" role="status" aria-live="polite"></p>
   <div class="pgbody" id="pgb-negocio"></div>
 </div>
 
 <div class="wrap" id="pg-metas" hidden>
   <div class="pgh"><h1>Metas</h1></div>
+  <p class="msg" id="me-msg" role="status" aria-live="polite"></p>
   <div class="pgbody" id="pgb-metas"></div>
 </div>
 
@@ -770,8 +797,8 @@ select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1
   <div class="pgh"><h1>Tu socio</h1></div>
   <p class="msg" id="s-msg" role="status" aria-live="polite"></p>
   <div class="tcols">
+    <div class="side pgbody"><div id="pgb-socio-c"></div><div id="pgb-socio-b"></div></div>
     <div class="side pgbody"><div id="pgb-socio-a"></div><div id="pgb-socio-r"></div></div>
-    <div class="side pgbody"><div id="pgb-socio-b"></div><div id="pgb-socio-s"></div></div>
   </div>
 </div>
 
@@ -901,7 +928,7 @@ function renderPlata(){
   const ventaRow = ({v, done}) => `<div class="row${done ? ' done' : ''}"><button class="ck" type="button" data-ref="venta:${esc(v.id)}" aria-pressed="${done}" aria-label="${done ? 'Desmarcar' : 'Marcar como vendido'}: ${esc(v.item)}"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></button><div class="nm"><b>${esc(v.item)}</b><span>${done ? 'Vendido' : 'Para vender'}</span></div><div class="am num">${money(v.monto)}</div></div>`;
   box.innerHTML = `
     <div class="kpis">
-      <div class="kpi"><b class="num">${money(plata.libre)}</b><span>Me queda este mes: ingresos menos fijos, esenciales y cuotas (no son tus ahorros)</span></div>
+      <div class="kpi"><b class="num">${money(plata.libre)}</b><span>Me queda<span class="det"> este mes: ingresos menos fijos, esenciales y cuotas (no son tus ahorros)</span></span></div>
       <div class="kpi"><b class="num">${money(porPagar)}</b><span>${pend.length ? `Fijos por pagar (${pend.length})` : 'Fijos del mes: todo pagado'}</span></div>
       ${(() => {
         const cs = Array.isArray(plata.cuentas) ? plata.cuentas : [];
@@ -909,13 +936,13 @@ function renderPlata(){
         const ars = cs.filter(c => (c.moneda || 'ARS') === 'ARS').reduce((s, c) => s + (+c.saldo || 0), 0);
         const usd = cs.filter(c => c.moneda === 'USD').reduce((s, c) => s + (+c.saldo || 0), 0);
         const det = cs.map(c => `${esc(c.nombre)}: ${c.moneda === 'USD' ? 'USD ' + nf(c.saldo, 2) : money(c.saldo)}`).join(' · ');
-        return `<div class="kpi" style="grid-column:1/-1"><b class="num">${money(ars)}${usd ? `<small> + USD ${nf(usd, 2)}</small>` : ''}</b><span>Ahorros en tus cuentas${plata.cuentas_fecha ? ' al ' + esc(fmtD(plata.cuentas_fecha)) : ''} · ${det}</span></div>`;
+        return `<div class="kpi" style="grid-column:1/-1"><b class="num">${money(ars)}${usd ? `<small> + USD ${nf(usd, 2)}</small>` : ''}</b><span>Ahorros<span class="det"> en tus cuentas${plata.cuentas_fecha ? ' al ' + esc(fmtD(plata.cuentas_fecha)) : ''} · ${det}</span></span></div>`;
       })()}
     </div>
-    ${plata.nota ? `<p class="tipline clamp2">${esc(plata.nota)}</p>` : ''}
-    <div class="sec"><p class="lbl">Vencimientos</p>${pend.map(fijoRow).join('')}${pagados.map(fijoRow).join('')}</div>
-    <div class="sec"><p class="lbl">Compras · qué entra este mes</p>${plan.map(compraRow).join('') || '<p class="empty">Sin compras anotadas.</p>'}</div>
-    <div class="sec"><p class="lbl">Para vender · ${money(vendible)} posibles${vendido ? ` · ${money(vendido)} vendido` : ''}</p>${ventas.map(ventaRow).join('') || '<p class="empty">Nada para vender anotado.</p>'}</div>`;
+    ${plata.nota ? `<p class="tipline clamp2 det">${esc(plata.nota)}</p>` : ''}
+    <div class="sec xtra"><p class="lbl">Vencimientos</p>${pend.map(fijoRow).join('')}${pagados.map(fijoRow).join('')}</div>
+    <div class="sec xtra"><p class="lbl">Compras · qué entra este mes</p>${plan.map(compraRow).join('') || '<p class="empty">Sin compras anotadas.</p>'}</div>
+    <div class="sec xtra"><p class="lbl">Para vender · ${money(vendible)} posibles${vendido ? ` · ${money(vendido)} vendido` : ''}</p>${ventas.map(ventaRow).join('') || '<p class="empty">Nada para vender anotado.</p>'}</div>`;
 }
 let lastDel = null;
 let openRef = null, editMeta = null, justRef = null, writeChain = Promise.resolve(), showAllAlerts = false;
@@ -1225,8 +1252,11 @@ function metaVals(m){
 const RITMO = {en_camino:['good','En camino'], ajustado:['warn','Ajustado'], atrasado:['bad','Atrasado'], logrado:['good','Logrado']};
 function renderMetas(){
   const box = $('metas');
-  const ms = (estado && Array.isArray(estado.metas)) ? estado.metas.filter(m => m && m.id) : [];
-  if (!ms.length){ box.innerHTML = `<p class="empty">${loaded.e ? 'Sin metas cargadas todavía.' : 'Cargando metas…'}</p>`; return; }
+  const ms = metasList();
+  const nueva = editMeta === '__nueva'
+    ? `<form class="inl" data-form="meta" data-id="__nueva"><label for="m-tit">Meta nueva<input id="m-tit" type="text" maxlength="80" placeholder="Ej: Leer 2 libros" autocomplete="off"></label><label for="m-obj">Objetivo<input id="m-obj" type="text" inputmode="decimal" placeholder="2" autocomplete="off"></label><label for="m-uni">Unidad<input id="m-uni" type="text" maxlength="20" placeholder="libros" autocomplete="off"></label><label for="m-act">Cuánto vas<input id="m-act" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></label><button class="btn" type="submit">Crear</button><button class="btn ghost" type="button" data-cancel-meta>Cancelar</button></form>`
+    : `<button class="linkb fadd" type="button" data-edit="__nueva">+ Nueva meta</button>`;
+  if (!ms.length){ box.innerHTML = `<p class="empty">${loaded.e ? 'Sin metas cargadas todavía.' : 'Cargando metas…'}</p><div class="xtra">${nueva}</div>`; return; }
   box.innerHTML = ms.map(m => {
     const v = metaVals(m), dec = m.dec || 0, u = m.unidad ? ' ' + esc(m.unidad) : '';
     let r = v.pct === 1 ? RITMO.logrado : RITMO[m.ritmo];
@@ -1239,10 +1269,10 @@ function renderMetas(){
     else line = `<span><b>${nf(v.actual, dec)}</b> de ${nf(v.objetivo, dec)}${u}</span>`;
     let form = '';
     if (editMeta === m.id){
-      form = `<form class="inl" data-form="meta" data-id="${esc(m.id)}">${m.auto ? '' : `<label for="m-act">Cuánto vas<input id="m-act" type="text" inputmode="decimal" value="${v.actual != null ? esc(String(v.actual).replace('.', ',')) : ''}" autocomplete="off"></label>`}<label for="m-obj">Meta<input id="m-obj" type="text" inputmode="decimal" value="${v.objetivo != null ? esc(String(v.objetivo).replace('.', ',')) : ''}" autocomplete="off"></label><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-cancel-meta>Cancelar</button></form>`;
+      form = `<form class="inl" data-form="meta" data-id="${esc(m.id)}"><label for="m-tit">Nombre<input id="m-tit" type="text" maxlength="80" value="${esc(m.titulo)}" autocomplete="off"></label>${m.auto ? '' : `<label for="m-act">Cuánto vas<input id="m-act" type="text" inputmode="decimal" value="${v.actual != null ? esc(String(v.actual).replace('.', ',')) : ''}" autocomplete="off"></label>`}<label for="m-obj">Meta<input id="m-obj" type="text" inputmode="decimal" value="${v.objetivo != null ? esc(String(v.objetivo).replace('.', ',')) : ''}" autocomplete="off"></label><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-meta-del="${esc(m.id)}">Eliminar</button><button class="btn ghost" type="button" data-cancel-meta>Cancelar</button></form>${m.auto ? '<p class="vnota">El avance de esta meta lo actualiza tu socio solo.</p>' : ''}`;
     }
-    return `<div class="meta"><div class="mh"><span class="mt">${esc(m.titulo)}</span>${pill}${pct}</div><div class="bar ${barCls}"><i style="width:${v.pct == null ? 0 : Math.round(v.pct*100)}%"></i></div><div class="md">${line}${m.detalle ? `<span class="clamp2">${esc(m.detalle)}</span>` : ''}<button class="linkb" type="button" data-edit="${esc(m.id)}">${m.auto ? 'Cambiar meta' : (v.actual == null ? 'Cargar dato' : 'Actualizar')}</button></div>${form}</div>`;
-  }).join('');
+    return `<div class="meta"><div class="mh"><span class="mt">${esc(m.titulo)}</span>${pill}${pct}</div><div class="bar ${barCls}"><i style="width:${v.pct == null ? 0 : Math.round(v.pct*100)}%"></i></div><div class="md det">${line}${m.detalle ? `<span class="clamp2">${esc(m.detalle)}</span>` : ''}<button class="linkb" type="button" data-edit="${esc(m.id)}">Editar</button></div>${form}</div>`;
+  }).join('') + `<div class="xtra">${nueva}</div>`;
 }
 
 function renderFinales(){
@@ -1259,7 +1289,7 @@ function renderFinales(){
     const falta = tot - hec;
     const tone = !tot ? '' : p >= 1 ? 'good' : falta > n ? 'bad' : falta > n*.6 ? 'warn' : 'good';
     const w = Math.max(Math.round(p*100), tone === 'bad' ? 3 : 0);
-    return `<div class="fin${cls}"><div class="d"><b class="num">${big}</b><span>${small}</span></div><div class="ft"><div class="fn"><b>${esc(f.titulo)}</b>${f.oral ? '<span class="chip">Oral</span>' : ''}<span>${esc(fmtD(f.fecha, {weekday:'short', day:'numeric', month:'short'}))}</span></div>${tot ? `<div class="fp"><div class="bar ${tone}"><i style="width:${w}%"></i></div><span class="num">${hec}/${tot} días de estudio</span></div>` : ''}${f.nota ? `<span class="fnote clamp2">${esc(f.nota)}</span>` : ''}</div></div>`;
+    return `<div class="fin${cls}"><div class="d"><b class="num">${big}</b><span>${small}</span></div><div class="ft"><div class="fn"><b>${esc(f.titulo)}</b>${f.oral ? '<span class="chip">Oral</span>' : ''}<span>${esc(fmtD(f.fecha, {weekday:'short', day:'numeric', month:'short'}))}</span></div>${tot ? `<div class="fp"><div class="bar ${tone}"><i style="width:${w}%"></i></div><span class="num det">${hec}/${tot} días de estudio</span></div>` : ''}${f.nota ? `<span class="fnote clamp2 det">${esc(f.nota)}</span>` : ''}</div></div>`;
   }).join('');
 }
 
@@ -1295,11 +1325,11 @@ function renderDieta(){
   $('diet-dia').textContent = d.dia || '';
   const meta = d.pausa ? 0 : +d.meta_kcal || 0, kc = +d.kcal || 0, p = meta ? Math.min(1, kc/meta) : 0, quedan = meta - kc;
   box.innerHTML = `<div class="diet">
-    <div class="kpi"><b class="num">${nf(kc)}<small> ${meta ? '/ ' + nf(meta) : 'kcal'}</small></b><span>${!meta ? 'Hoy no contás' : `kcal ${quedan >= 0 ? `· quedan ${nf(quedan)}` : `· ${nf(-quedan)} de más`}`}</span></div>
-    <div class="kpi"><b class="num">${d.peso != null ? nf(d.peso, 1) : '—'}<small> kg</small></b><span>${d.peso_fecha ? 'Último pesaje · ' + esc(fmtD(d.peso_fecha, {weekday:'short', day:'numeric'})) : 'Sin pesaje reciente'}</span></div>
+    <div class="kpi"><b class="num">${nf(kc)}<small> ${meta ? '/ ' + nf(meta) : 'kcal'}</small></b><span>${!meta ? 'Hoy no contás' : `kcal<span class="det"> ${quedan >= 0 ? `· quedan ${nf(quedan)}` : `· ${nf(-quedan)} de más`}</span>`}</span></div>
+    <div class="kpi"><b class="num">${d.peso != null ? nf(d.peso, 1) : '—'}<small> kg</small></b><span>Peso<span class="det">${d.peso_fecha ? ' · último pesaje ' + esc(fmtD(d.peso_fecha, {weekday:'short', day:'numeric'})) : ''}</span></span></div>
     <div class="bar ${!meta ? '' : kc > meta*1.05 ? 'bad' : kc > meta ? 'warn' : 'good'}"><i style="width:${Math.round(p*100)}%"></i></div>
   </div>
-  <div class="dl"><span>${esc(d.pausa ? d.dia : (d.nota || ''))}</span><button class="linkb" type="button" data-page="dieta" style="margin-left:0">Abrir dieta</button></div>`;
+  <div class="dl det"><span>${esc(d.pausa ? d.dia : (d.nota || ''))}</span><button class="linkb" type="button" data-page="dieta" style="margin-left:0">Abrir dieta</button></div>`;
 }
 
 function mesesSvg(ms){
@@ -1326,14 +1356,15 @@ function renderNegocio(){
   const box = $('negocio');
   const n = estado && estado.negocio;
   if (!n){ box.innerHTML = `<p class="empty">${loaded.e ? 'Sin números del negocio todavía.' : 'Cargando números…'}</p>`; return; }
-  $('neg-upd').textContent = n.titulo || 'Routly';
+  const upd = n.actualizado || (estado && estado.generado);
+  $('neg-upd').textContent = upd ? 'Actualizado ' + fmtUpd(upd) : (n.titulo || 'Routly');
   const kp = Array.isArray(n.kpis) ? n.kpis : [];
   const ms = Array.isArray(n.meses) ? n.meses : [];
-  const rs = Array.isArray(n.recomendaciones) ? n.recomendaciones : [];
+  const rs = recosNeg();
   box.innerHTML = `
-    ${kp.length ? `<div class="kgrid">${kp.map(k => `<div class="kpi"><b class="num">${esc(k.v)}</b><span>${esc(k.k)}${k.d ? ' · ' + esc(k.d) : ''}</span></div>`).join('')}</div>` : ''}
-    ${ms.length ? `<div class="sec"><p class="lbl">Ventas por mes</p><div class="mchart">${mesesSvg(ms)}</div></div>` : ''}
-    ${rs.length ? `<div class="sec"><p class="lbl">Recomendaciones de tu socio</p><ol class="recos">${rs.map(r => `<li><span class="clamp2">${esc(r)}</span></li>`).join('')}</ol></div>` : ''}`;
+    ${kp.length ? `<div class="kgrid">${kp.map((k, i) => `<div class="kpi${i >= 4 ? ' xtra' : ''}"><b class="num">${esc(k.v)}</b><span>${esc(k.k)}${k.d ? `<span class="det"> · ${esc(k.d)}</span>` : ''}</span></div>`).join('')}</div>` : ''}
+    ${ms.length ? `<div class="sec xtra"><p class="lbl">Ventas por mes</p><div class="mchart">${mesesSvg(ms)}</div></div>` : ''}
+    ${rs.length ? `<div class="sec xtra"><p class="lbl">Recomendaciones de tu socio</p><ol class="recos">${rs.map(recoHtml).join('')}</ol><p class="vnota">Lo que hacés vos va a tu lista de hoy. Lo de Meta o la tienda lo aplico yo cuando me lo confirmás en Claude.</p></div>` : ''}`;
 }
 
 function renderSocio(){
@@ -1476,8 +1507,8 @@ document.addEventListener('submit', e => {
     return;
   }
   if (f.dataset.form === 'meta'){
-    if (!db){ msg('No se puede guardar desde esta vista.', 'err'); return; }
-    const id = f.dataset.id, m = (estado.metas || []).find(x => x.id === id);
+    if (!db){ pmsg('No se puede guardar desde esta vista.', 'err'); return; }
+    const id = f.dataset.id, nueva = id === '__nueva', m = nueva ? null : metasList().find(x => x.id === id);
     const num = el => {
       if (!el) return undefined;
       let s = el.value.trim().replace(/\s/g, '');
@@ -1486,18 +1517,22 @@ document.addEventListener('submit', e => {
       else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
       const n = parseFloat(s); return isNaN(n) ? NaN : n;
     };
-    const act = num($('m-act')), obj = num($('m-obj'));
-    if (Number.isNaN(act) || Number.isNaN(obj)){ msg('Usá solo números.', 'err'); return; }
-    const valores = Object.assign({}, manual.valores || {});
-    const cur = Object.assign({}, valores[id] || {});
-    if (m && !m.auto && act !== undefined) cur.actual = act;
-    if (obj !== undefined) cur.objetivo = obj;
-    cur.en = iso();
-    valores[id] = cur;
-    manual = {valores};
-    editMeta = null; render();
-    db.doc('manual/metas').mutate(d => { d = d && typeof d === 'object' ? d : {}; d.valores = d.valores || {}; d.valores[id] = cur; return d; })
-      .then(() => msg('Meta actualizada.', 'ok')).catch(() => msg('No se pudo guardar la meta.', 'err'));
+    const act = num($('m-act')), obj = num($('m-obj')), tit = $('m-tit') ? $('m-tit').value.trim().slice(0, 80) : '';
+    if (Number.isNaN(act) || Number.isNaN(obj)){ pmsg('Usá solo números.', 'err'); return; }
+    if (nueva){
+      if (!tit || obj == null){ pmsg('Poné un nombre y un objetivo.', 'err'); return; }
+      const nm = {id: 'm' + Date.now().toString(36) + rid().slice(0, 4), titulo: tit, area: 'Personal', auto: false, inicio: 0, objetivo: obj, unidad: ($('m-uni').value || '').trim().slice(0, 20), actual: act == null ? null : act, creado: iso()};
+      manual = Object.assign({}, manual, {nuevas: (Array.isArray(manual.nuevas) ? manual.nuevas : []).concat([nm])});
+      editMeta = null; render();
+      db.doc('manual/metas').mutate(d => { d = d && typeof d === 'object' ? d : {}; d.valores = d.valores || {}; d.nuevas = (Array.isArray(d.nuevas) ? d.nuevas : []).filter(x => x && x.id !== nm.id).concat([nm]); return d; })
+        .then(() => pmsg('Meta creada.', 'ok')).catch(() => pmsg('No se pudo guardar la meta.', 'err'));
+      return;
+    }
+    const patch = {};
+    if (m && !m.auto && act !== undefined) patch.actual = act;
+    if (obj !== undefined) patch.objetivo = obj;
+    if (tit && m && tit !== m.titulo) patch.titulo = tit;
+    editMeta = null; metaSet(id, patch); pmsg('Meta actualizada.', 'ok');
   }
 });
 
@@ -1760,7 +1795,7 @@ function setPage(p, push){
 }
 window.addEventListener('popstate', () => setPage(location.hash.slice(1) || 'inicio', false));
 function pmsg(t, cls, extra){
-  const m = $({habitos: 'h-msg', finanzas: 'f-msg', dieta: 'd-msg', socio: 's-msg'}[page] || 't-msg'); if (!m) return;
+  const m = $({habitos: 'h-msg', finanzas: 'f-msg', dieta: 'd-msg', socio: 's-msg', finales: 'fi-msg', negocio: 'n-msg', metas: 'me-msg', inicio: 'msg'}[page] || 't-msg'); if (!m) return;
   m.className = 'msg' + (cls ? ' ' + cls : '');
   m.innerHTML = esc(t || '') + (extra || '');
 }
@@ -2254,7 +2289,7 @@ function fResumenHtml(){
   const m = fmes, c = finCalc(m), hoyM = today().slice(0, 7);
   if (!c.hay && !finItems(m, 'compra').length && !finItems(m, 'venta').length){
     const prev = [...new Set(M.fin.items.filter(i => i.mes < m).map(i => i.mes))].sort().pop();
-    return `<section class="panel"><div class="ph"><h2>${esc(mesLabel(m))}</h2></div><p class="empty">Este mes todavía no está armado.</p>${prev ? `<button class="btn" type="button" data-farmar="${m}">Armar ${esc(capi(fmtD(m + '-01', {month: 'long'})))} con lo de ${esc(fmtD(prev + '-01', {month: 'long'}))}</button><p class="vnota">Copia ingresos, fijos, esenciales y cuotas sin marcar, y las compras y ventas pendientes. Después ajustás los montos.</p>` : ''}</section>${fMovsHtml(m)}`;
+    return `<section class="panel"><div class="ph"><h2>${esc(mesLabel(m))}</h2></div><p class="empty">Este mes todavía no está armado.</p>${prev ? `<button class="btn" type="button" data-farmar="${m}">Armar ${esc(capi(fmtD(m + '-01', {month: 'long'})))} con lo de ${esc(fmtD(prev + '-01', {month: 'long'}))}</button><p class="vnota">Copia ingresos, fijos, esenciales y cuotas sin marcar, y las compras y ventas pendientes. Después ajustás los montos.</p>` : ''}</section>${fGraficoHtml(m)}${fMovsHtml(m)}`;
   }
   const porPagar = c.fij.concat(c.tar).filter(i => !i.hecho).reduce((s, i) => s + (+i.monto || 0), 0);
   const gastEse = c.ese.reduce((s, e) => s + gastadoCat(m, e.nombre), 0);
@@ -2276,7 +2311,7 @@ function fResumenHtml(){
   </section>`;
   const izq = fSeccion(m, 'ingreso') + fSeccion(m, 'fijo') + fSeccion(m, 'esencial', {head: (its, tot) => its.length ? `${money(gastEse)} de ${money(tot)}` : ''}) + fSeccion(m, 'tarjeta');
   const der = fSeccion(m, 'compra', {head: () => pendC ? `${money(pendC)} pendiente` : '', pill: fComprasPill(m, c.queda)}) + fSeccion(m, 'venta', {head: () => `${money(vendible)} posibles${vendido ? ' · ' + money(vendido) + ' vendido' : ''}`}) ;
-  return top + `<div class="tcols"><div class="side">${izq}</div><div class="side">${der}${fMovsHtml(m)}</div></div>`;
+  return top + fGraficoHtml(m) + `<div class="tcols"><div class="side">${izq}</div><div class="side">${der}${fMovsHtml(m)}</div></div>`;
 }
 
 /* Ahorros */
@@ -2540,76 +2575,11 @@ function dComidasHtml(){
     ${its.length ? '<span class="lbl">Lo que ya comiste</span>' : ''}${meals}
   </section>`;
 }
-function dDiasHtml(){
-  const tN = dayN(today()), P = dPesos();
-  const firstN = Math.min(dS0(), ...M.diet.items.map(i => dayN(i.fecha)));
-  const rows = []; let wk = {n: 0, kcal: 0};
-  for (let n = tN; n >= firstN; n--){
-    const f = fromN(n), its = dItems(f), tg = dTarget(f), s = sumItems(its);
-    let pill;
-    if (!its.length) pill = tg.pausa ? '<span class="pill neutral">Pausa</span>' : '<span class="pill neutral">Sin cargar</span>';
-    else if (n === tN) pill = '<span class="pill neutral">En curso</span>';
-    else if (tg.kcal == null) pill = '';
-    else { const diff = Math.round(s.kcal - tg.kcal); pill = Math.abs(diff) <= 150 ? '<span class="pill good">En meta</span>' : diff > 0 ? `<span class="pill bad">+${nf(diff)} kcal</span>` : `<span class="pill warn">−${nf(-diff)} kcal</span>`; }
-    if (its.length && n !== tN && dWeekOf(f) === dWeekOf(today())){ wk.n++; wk.kcal += s.kcal; }
-    rows.push(`<button class="row nock drow2${f === dDia ? ' sel' : ''}" type="button" data-ddia="${f}"><div class="nm"><b>${esc(dRelDay(f))}${dRelDay(f) === 'Hoy' || dRelDay(f) === 'Ayer' ? ' · ' + esc(fmtD(f, {weekday: 'short'})) : ' ' + esc(fmtD(f))}${P.has(f) ? ` <em>· ${kgf(P.get(f), 1)} kg</em>` : ''}</b><span>${its.length ? `${nf(s.kcal)}${tg.kcal ? ' / ' + nf(tg.kcal) : ''} kcal · ${nf(s.p)}P ${nf(s.c)}C ${nf(s.g)}G` : tg.kcal ? `Meta ${nf(tg.kcal)} kcal` : esc(tg.label)}</span></div><div class="am">${pill}</div></button>`);
-  }
-  const vis = dVerDias ? rows : rows.slice(0, 10);
-  return `<section class="panel"><div class="ph"><h2>Todos los días</h2><span class="lbl">Tocá un día para verlo</span></div>
-    ${wk.n ? `<p class="vnota">Esta semana venís promediando <b class="num">${nf(wk.kcal/wk.n)} kcal</b> por día (${wk.n} ${wk.n === 1 ? 'día cerrado' : 'días cerrados'}).</p>` : ''}
-    <div class="sec">${vis.join('')}</div>${rows.length > 10 ? `<button class="linkb" type="button" data-dverdias>${dVerDias ? 'Ver menos' : `Ver los ${rows.length} días`}</button>` : ''}</section>`;
-}
-function dFaseHtml(P){
-  const c = dCfg(), fa = c.fase || {}, S0 = dS0(), W = dWeeks(), t = dayN(today()), w = dWeekOf(today());
-  let sub;
-  if (t < S0) sub = 'Arranca el ' + fmtD(fromN(S0), {weekday: 'long', day: 'numeric', month: 'long'}) + '.';
-  else if (w >= W) sub = fa.al_terminar || 'Fase terminada.';
-  else { const left = S0 + 7*W - 1 - t; sub = `Semana ${w + 1} de ${W} · faltan ${left} ${left === 1 ? 'día' : 'días'}`; }
-  const segs = Array.from({length: W}, (_, i) => { const cls = i < w ? 'done' : i === w ? 'now' : ''; const pct = i === w ? Math.round((t - (S0 + 7*i) + 1)/7*100) : 0; return `<span class="${cls}"${cls === 'now' ? ` style="--p:${pct}%"` : ''}></span>`; }).join('');
-  const wTop = Math.min(w, W - 1);
-  let lw = null; for (let i = wTop; i >= 0; i--){ if (dWeekVal(i, P) != null){ lw = i; break; } }
-  const a = lw == null ? null : dWeekVal(lw, P), prev = lw == null || lw === 0 ? dStartKg(P) : dWeekVal(lw - 1, P);
-  const delta = a != null && prev != null ? a - prev : null, base = dStartKg(P), pc = dPace(delta);
-  const lwd = dLastWeighDay(), prox = P.has(lwd) ? addDays(lwd, 7) : lwd;
-  return `<section class="panel"><div class="ph"><h2>${esc(fa.nombre || 'Plan')}</h2><span class="lbl">${esc(sub)}</span></div>
-    <div class="dprog">${segs}</div>
-    <div class="dtiles">
-      <div class="kpi"><b class="num">${a != null ? kgf(a, 2) : '—'}<small> kg</small></b><span>Último pesaje semanal${lw != null ? ' · semana ' + (lw + 1) : ''}</span></div>
-      <div class="kpi"><b class="num">${delta == null ? '—' : sgnKg(delta)}</b><span><span class="pill ${pc.cls}">${pc.txt}</span></span></div>
-      <div class="kpi"><b class="num">${base != null && a != null ? sgnKg(a - base) : '—'}</b><span>Desde el inicio${base != null ? ' (' + kgf(base, 1) + ' kg)' : ''}</span></div>
-      <div class="kpi"><b class="num" style="font-size:22px">${esc(capi(fmtD(prox, {weekday: 'short', day: 'numeric'})))}</b><span>Próximo pesaje · ${esc(((c.pesaje && c.pesaje.texto) || 'en ayunas').replace(/^\w+ /, ''))}</span></div>
-    </div></section>`;
-}
 function dPesajeHtml(P, F){
   const lf = dLastWeighDay(), kg = P.get(lf), done = kg != null && !dEditPeso, txt = (dCfg().pesaje && dCfg().pesaje.texto) || 'En ayunas, con la foto';
   if (done) return `<section class="panel"><div class="ph"><h2>Pesaje semanal</h2><button class="btn ghost sm" type="button" data-dpesoedit>Corregir</button></div><div class="dok"><span class="dck">✓</span><div><b class="num">${kgf(kg, 2)} kg${F.has(lf) ? ' · con foto' : ''}</b><span>${esc(capi(fmtD(lf, {weekday: 'long', day: 'numeric'})))} · próximo: ${esc(fmtD(addDays(lf, 7), {weekday: 'long', day: 'numeric'}))}</span></div></div></section>`;
   return `<section class="panel"><div class="ph"><h2>Pesaje semanal</h2><span class="lbl">${esc(txt)}</span></div>
     <form class="inl mvf" data-dform="peso" autocomplete="off"><label class="mvl">Fecha<input id="dp-f" type="date" max="${today()}" value="${dEditPeso ? lf : lf}"></label><input id="dp-kg" type="text" inputmode="decimal" placeholder="86,4" aria-label="Peso en kg" value="${dEditPeso && kg != null ? String(kg).replace('.', ',') : ''}" style="flex:0 1 110px"><label class="btn soft dfile">${dFotoPeso ? 'Foto lista ✓' : 'Sumar foto'}<input type="file" accept="image/*" data-dfotopeso hidden></label><button class="btn" type="submit">Guardar</button>${dEditPeso ? '<button class="btn ghost" type="button" data-dpesocancel>Cancelar</button>' : ''}</form></section>`;
-}
-function dChartHtml(P){
-  const pts = [...P].map(([f, kg]) => ({x: dayN(f), y: kg}));
-  if (!pts.length) return `<section class="panel"><div class="ph"><h2>Tendencia</h2></div><p class="empty">Con el primer pesaje aparece la curva.</p></section>`;
-  const S0 = dS0(), W = dWeeks(), fa = dCfg().fase || {}, mn = +(fa.ritmo_min || .5), mx = +(fa.ritmo_max || .7);
-  const x0 = Math.min(S0, pts[0].x), x1 = Math.max(S0 + 7*W - 1, pts[pts.length - 1].x);
-  const base = dStartKg(P) != null ? dStartKg(P) : pts[0].y;
-  const band = [S0, x1].map(x => ({x, hi: base - mn*(x - S0)/7, lo: base - mx*(x - S0)/7}));
-  const avgs = [{x: S0, y: base}];
-  for (let w = 0; w <= Math.min(dWeekOf(today()), W - 1); w++){ const v = dWeekVal(w, P); if (v != null) avgs.push({x: dayN(dWeighDay(w)), y: v}); }
-  const ys = pts.map(p => p.y).concat(band.flatMap(b => [b.hi, b.lo]));
-  let y0 = Math.floor((Math.min(...ys) - .3)*2)/2, y1 = Math.ceil((Math.max(...ys) + .3)*2)/2;
-  if (y1 - y0 < 2){ const m = (y0 + y1)/2; y0 = Math.floor((m - 1)*2)/2; y1 = Math.ceil((m + 1)*2)/2; }
-  const Wd = 680, H = 250, L = 44, R = 14, T = 12, B = 30;
-  const sx = x => L + (x - x0)/(x1 - x0 || 1)*(Wd - L - R), sy = y => T + (y1 - y)/(y1 - y0)*(H - T - B);
-  const step = (y1 - y0) > 4 ? 1 : .5;
-  let g = '';
-  for (let v = y0; v <= y1 + 1e-9; v += step) g += `<line x1="${L}" x2="${Wd - R}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--line)"/><text x="${L - 8}" y="${sy(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${kgf(v)}</text>`;
-  for (let w = Math.floor((x0 - S0)/7); S0 + 7*w <= x1; w++){ const xv = S0 + 7*w; if (xv < x0) continue; g += `<line x1="${sx(xv)}" x2="${sx(xv)}" y1="${T}" y2="${H - B}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${sx(xv) + 3}" y="${H - 10}" font-size="11" fill="var(--muted)">${esc(fmtD(fromN(xv)))}</text>`; }
-  const poly = `${sx(band[0].x)},${sy(band[0].hi)} ${sx(band[1].x)},${sy(band[1].hi)} ${sx(band[1].x)},${sy(band[1].lo)} ${sx(band[0].x)},${sy(band[0].lo)}`;
-  const dots = pts.map(p => `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="3.5" fill="var(--muted)"><title>${esc(fmtD(fromN(p.x), {weekday: 'short', day: 'numeric', month: 'short'}))}: ${kgf(p.y, 2)} kg</title></circle>`).join('');
-  const line = avgs.length > 1 ? `<polyline points="${avgs.map(p => `${sx(p.x)},${sy(p.y)}`).join(' ')}" fill="none" stroke="var(--fg)" stroke-width="2.5" stroke-linejoin="round"/>` : '';
-  const aDots = avgs.map((p, i) => `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="${i === avgs.length - 1 ? 6 : 4.5}" fill="var(--fg)" stroke="var(--panel)" stroke-width="2"><title>${i === 0 ? 'Inicio' : 'Pesaje semanal'}: ${kgf(p.y, 2)} kg</title></circle>`).join('');
-  return `<section class="panel"><div class="ph"><h2>Tendencia</h2></div><div class="dchart"><svg viewBox="0 0 ${Wd} ${H}" role="img" aria-label="Pesaje semanal contra el ritmo objetivo">${g}<polygon points="${poly}" fill="var(--good-dim)"/>${dots}${line}${aDots}</svg></div>
-    <div class="dleg"><span><i style="background:var(--muted)"></i>Pesajes sueltos</span><span><i style="background:var(--fg)"></i>Pesaje semanal</span><span><i style="background:var(--good-dim)"></i>Ritmo objetivo (−${kgf(mn, 1)} a −${kgf(mx, 1)} kg/sem)</span></div></section>`;
 }
 function dGastoHtml(P){
   const g = dGastoReal(P), est = dCfg().gasto_estimado;
@@ -2624,36 +2594,154 @@ function dSlot(key, label, showKey, F){
   const inner = f ? (url ? `<a href="${esc(url)}" target="_blank" rel="noopener"><img src="${esc(url)}" alt="Foto ${esc(label)}" loading="lazy"></a>` : '<span>Cargando…</span>') : '<span>Sin foto</span>';
   return `<div class="dslot"><div class="dph">${inner}</div><span>${esc(label)}</span><label class="linkb dfile">${f ? 'Cambiar' : 'Subir foto'}<input type="file" accept="image/*" data-dslot="${key}" hidden></label></div>`;
 }
-function dSemanasHtml(P, F){
-  const S0 = dS0(), W = dWeeks(), cw = dWeekOf(today());
-  let html = `<div class="dweek"><div><h3>Inicio</h3><span class="vnota">Foto de partida para comparar al final.</span></div>${dSlot(fromN(S0 - 1), 'Inicio', null, F)}</div>`;
-  for (let w = 0; w < W; w++){
-    const a = dWeekVal(w, P), prev = w === 0 ? dStartKg(P) : dWeekVal(w - 1, P), delta = a != null && prev != null ? a - prev : null, pc = dPace(delta);
-    const wd = dWeighDay(w), fk = dFotoOfWeek(w, F);
-    html += `<div class="dweek${w === cw ? ' cur' : ''}"><div><h3>Semana ${w + 1} <span class="lbl">${esc(fmtD(fromN(S0 + 7*w)))} – ${esc(fmtD(fromN(S0 + 7*w + 6)))}</span></h3><span class="vnota">${a == null ? 'Sin pesaje' : kgf(a, 2) + ' kg'}${delta != null ? ' · ' + sgnKg(delta) + ` <span class="pill ${pc.cls}">${pc.txt}</span>` : ''}</span></div>${dSlot(wd, fk && fk !== wd ? capi(fmtD(fk, {weekday: 'short', day: 'numeric'})) : capi(fmtD(wd, {weekday: 'short', day: 'numeric'})), fk, F)}</div>`;
-  }
-  const keys = [...F.keys()].sort();
-  let cmp = '';
-  if (keys.length >= 2){
-    const a = F.get(keys[0]), b = F.get(keys[keys.length - 1]), ua = dSignedUrl(a.path), ub = dSignedUrl(b.path);
-    if (ua && ub) cmp = `<div class="dcmp"><figure><a href="${esc(ua)}" target="_blank" rel="noopener"><img src="${esc(ua)}" alt="Primera foto"></a><figcaption>${esc(fmtD(keys[0], {weekday: 'short', day: 'numeric', month: 'short'}))}</figcaption></figure><figure><a href="${esc(ub)}" target="_blank" rel="noopener"><img src="${esc(ub)}" alt="Última foto"></a><figcaption>${esc(fmtD(keys[keys.length - 1], {weekday: 'short', day: 'numeric', month: 'short'}))}</figcaption></figure></div>`;
-  }
-  return `<section class="panel"><div class="ph"><h2>Semanas y fotos</h2><span class="lbl">Una foto por semana, con el pesaje</span></div><div class="dweeks">${html}</div>${cmp ? '<span class="lbl">Antes y ahora</span>' + cmp : ''}</section>`;
-}
-function dHistHtml(P){
-  const rows = [...P].reverse();
-  return `<section class="panel"><div class="ph"><h2>Registro de peso</h2></div><div class="sec drows">${rows.map(([f, kg], i) => { const nx = rows[i + 1], d = nx ? kg - nx[1] : null, w = dWeekOf(f); return `<div class="row nock"><div class="nm"><b>${esc(capi(fmtD(f, {weekday: 'short', day: 'numeric', month: 'short'})))}</b><span>${w < 0 ? 'Previa' : w >= dWeeks() ? 'Después' : 'Semana ' + (w + 1)}${d != null ? ' · ' + sgnKg(d) : ''}</span></div><div class="am num"><span>${kgf(kg, 2)} kg</span><button class="x" type="button" data-dpdel="${f}" aria-label="Borrar pesaje del ${esc(fmtD(f))}">×</button></div></div>`; }).join('') || '<p class="empty">Todavía no hay pesajes.</p>'}</div></section>`;
-}
 function dReglasHtml(){
   const r = dCfg().reglas;
   return Array.isArray(r) && r.length ? `<section class="panel"><div class="ph"><h2>Reglas del plan</h2></div><ul class="dreglas">${r.map(x => `<li>${esc(x)}</li>`).join('')}</ul></section>` : '';
 }
+/* Dieta por mes: cada mes con sus semanas (de lunes a domingo, según el día de pesaje), fotos y tendencia */
+let dMes = today().slice(0, 7);
+const dMesFin = m => { const [y, mo] = m.split('-').map(Number); return m + '-' + pad(new Date(y, mo, 0).getDate()); };
+function dMesSemanas(m){
+  const out = [], pd = dPesoDow(), a = dayN(m + '-01'), b = dayN(dMesFin(m));
+  for (let n = a; n <= b; n++){ const f = fromN(n); if (isoDow(f) === pd){ const lo = addDays(f, 1 - pd); out.push({wd: f, lo, hi: addDays(lo, 6)}); } }
+  return out;
+}
+const dSemPrev = s => ({wd: addDays(s.wd, -7), lo: addDays(s.lo, -7), hi: addDays(s.hi, -7)});
+// Peso de la semana: el del día de pesaje; si no hubo y la semana ya terminó, el promedio de esa semana
+function dSemVal(s, P){
+  if (P.has(s.wd)) return P.get(s.wd);
+  const xs = [...P].filter(([f]) => f >= s.lo && f <= s.hi).map(x => x[1]);
+  return xs.length && s.hi < today() ? xs.reduce((x, y) => x + y, 0)/xs.length : null;
+}
+// Con qué peso arrancó el mes: la última semana con pesaje antes del mes, o el primer pesaje del mes
+function dBaseMes(m, P){
+  const ws = dMesSemanas(m); if (!ws.length) return null;
+  let s = dSemPrev(ws[0]);
+  for (let i = 0; i < 6; i++){ const v = dSemVal(s, P); if (v != null) return {v, f: s.wd}; s = dSemPrev(s); }
+  const first = [...P].find(([f]) => f >= m + '-01' && f <= dMesFin(m));
+  return first ? {v: first[1], f: first[0]} : null;
+}
+function dFaseMes(m){
+  const fa = dCfg().fase; if (!fa || !fa.inicio) return null;
+  const ini = fa.inicio, fin = addDays(ini, 7*dWeeks() - 1);
+  return ini > dMesFin(m) || fin < m + '-01' ? null : {fa, ini, fin};
+}
+function dPaceSem(s, delta){
+  const fm = dFaseMes(s.wd.slice(0, 7));
+  if (fm && s.wd >= fm.ini && s.wd <= addDays(fm.fin, 6)) return dPace(delta);
+  if (delta == null) return {cls: 'neutral', txt: 'Sin comparación'};
+  return {cls: 'neutral', txt: delta < -.1 ? 'Bajando' : delta > .1 ? 'Subiendo' : 'Estable'};
+}
+function dMesHtml(P){
+  const m = dMes, hoyM = today().slice(0, 7), t = today(), ws = dMesSemanas(m), fm = dFaseMes(m);
+  let li = -1; for (let i = ws.length - 1; i >= 0; i--) if (ws[i].wd <= t && dSemVal(ws[i], P) != null){ li = i; break; }
+  const a = li < 0 ? null : dSemVal(ws[li], P), pv = li < 0 ? null : dSemVal(dSemPrev(ws[li]), P);
+  const delta = a != null && pv != null ? a - pv : null, pc = li < 0 ? {cls: 'neutral', txt: 'Sin pesaje'} : dPaceSem(ws[li], delta);
+  const base = dBaseMes(m, P), dm = a != null && base && base.f < ws[li].wd ? a - base.v : null;
+  let sub;
+  if (fm){
+    const W = dWeeks(), nom = fm.fa.nombre || 'Plan';
+    if (t < fm.ini) sub = `${nom}: arranca el ${fmtD(fm.ini, {day: 'numeric', month: 'short'})}`;
+    else if (t > fm.fin) sub = `${nom}: del ${fmtD(fm.ini)} al ${fmtD(fm.fin)}`;
+    else { const w = Math.floor((dayN(t) - dayN(fm.ini))/7), left = dayN(fm.fin) - dayN(t); sub = `${nom} · semana ${w + 1} de ${W} · faltan ${left} ${left === 1 ? 'día' : 'días'}`; }
+  } else { const tg = dTarget(m === hoyM ? t : m + '-15'); sub = tg.pausa ? tg.label : tg.kcal ? `Plan: ${nf(tg.kcal)} kcal por día` : 'Sin plan cargado para este mes'; }
+  const segs = ws.map(s => { const cls = s.hi < t ? 'done' : (t >= s.lo && t <= s.hi) ? 'now' : ''; const pct = cls === 'now' ? Math.round((dayN(t) - dayN(s.lo) + 1)/7*100) : 0; return `<span class="${cls}"${cls === 'now' ? ` style="--p:${pct}%"` : ''}></span>`; }).join('');
+  const lwd = dLastWeighDay(), prox = P.has(lwd) ? addDays(lwd, 7) : lwd;
+  const nPes = [...P.keys()].filter(f => f >= m + '-01' && f <= dMesFin(m)).length;
+  return `<section class="panel"><div class="ph"><h2>${esc(capi(fmtD(m + '-01', {month: 'long'})))}</h2><div class="per"><button class="nb" type="button" data-dmes="-1" aria-label="Mes anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="pl">${esc(mesLabel(m))}</span><button class="nb" type="button" data-dmes="1" aria-label="Mes siguiente"${m >= hoyM ? ' disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div></div>
+    <p class="lbl" style="margin:-4px 0 0">${esc(sub)}</p>
+    <div class="dprog">${segs}</div>
+    <div class="dtiles">
+      <div class="kpi"><b class="num">${a != null ? kgf(a, 2) : '—'}<small> kg</small></b><span>Último pesaje semanal${li >= 0 ? ' · semana ' + (li + 1) : ''}</span></div>
+      <div class="kpi"><b class="num">${delta == null ? '—' : sgnKg(delta)}</b><span><span class="pill ${pc.cls}">${pc.txt}</span></span></div>
+      <div class="kpi"><b class="num">${dm == null ? '—' : sgnKg(dm)}</b><span>En el mes${base ? ' (desde ' + kgf(base.v, 1) + ' kg)' : ''}</span></div>
+      ${m === hoyM ? `<div class="kpi"><b class="num" style="font-size:22px">${esc(capi(fmtD(prox, {weekday: 'short', day: 'numeric'})))}</b><span>Próximo pesaje · ${esc(((dCfg().pesaje && dCfg().pesaje.texto) || 'en ayunas').replace(/^\w+ /, ''))}</span></div>` : `<div class="kpi"><b class="num">${nPes}</b><span>Pesajes en el mes</span></div>`}
+    </div></section>`;
+}
+function dDiasHtml(){
+  const m = dMes, tN = dayN(today()), P = dPesos(), a0 = dayN(m + '-01'), a1 = Math.min(tN, dayN(dMesFin(m)));
+  const datos = M.diet.items.map(i => dayN(i.fecha)).concat([...P.keys()].map(dayN));
+  const firstN = Math.max(a0, datos.length ? Math.min(...datos) : a1);
+  const rows = []; let wk = {n: 0, kcal: 0}, mes = {n: 0, kcal: 0};
+  for (let n = a1; n >= firstN; n--){
+    const f = fromN(n), its = dItems(f), tg = dTarget(f), s = sumItems(its);
+    let pill;
+    if (!its.length) pill = tg.pausa ? '<span class="pill neutral">Pausa</span>' : '<span class="pill neutral">Sin cargar</span>';
+    else if (n === tN) pill = '<span class="pill neutral">En curso</span>';
+    else if (tg.kcal == null) pill = '';
+    else { const diff = Math.round(s.kcal - tg.kcal); pill = Math.abs(diff) <= 150 ? '<span class="pill good">En meta</span>' : diff > 0 ? `<span class="pill bad">+${nf(diff)} kcal</span>` : `<span class="pill warn">−${nf(-diff)} kcal</span>`; }
+    if (its.length && n !== tN){ mes.n++; mes.kcal += s.kcal; if (wkStart(f) === wkStart(today())){ wk.n++; wk.kcal += s.kcal; } }
+    rows.push(`<button class="row nock drow2${f === dDia ? ' sel' : ''}" type="button" data-ddia="${f}"><div class="nm"><b>${esc(dRelDay(f))}${dRelDay(f) === 'Hoy' || dRelDay(f) === 'Ayer' ? ' · ' + esc(fmtD(f, {weekday: 'short'})) : ' ' + esc(fmtD(f))}${P.has(f) ? ` <em>· ${kgf(P.get(f), 1)} kg</em>` : ''}</b><span>${its.length ? `${nf(s.kcal)}${tg.kcal ? ' / ' + nf(tg.kcal) : ''} kcal · ${nf(s.p)}P ${nf(s.c)}C ${nf(s.g)}G` : tg.kcal ? `Meta ${nf(tg.kcal)} kcal` : esc(tg.label)}</span></div><div class="am">${pill}</div></button>`);
+  }
+  const vis = dVerDias ? rows : rows.slice(0, 10), cur = m === today().slice(0, 7);
+  const nota = cur && wk.n ? `Esta semana venís promediando <b class="num">${nf(wk.kcal/wk.n)} kcal</b> por día (${wk.n} ${wk.n === 1 ? 'día cerrado' : 'días cerrados'}).`
+    : mes.n ? `En ${esc(fmtD(m + '-01', {month: 'long'}))} promediaste <b class="num">${nf(mes.kcal/mes.n)} kcal</b> por día (${mes.n} ${mes.n === 1 ? 'día cargado' : 'días cargados'}).` : '';
+  return `<section class="panel"><div class="ph"><h2>Días de ${esc(fmtD(m + '-01', {month: 'long'}))}</h2><span class="lbl">Tocá un día para verlo</span></div>
+    ${nota ? `<p class="vnota">${nota}</p>` : ''}
+    <div class="sec">${vis.join('') || '<p class="empty">Sin días cargados este mes.</p>'}</div>${rows.length > 10 ? `<button class="linkb" type="button" data-dverdias>${dVerDias ? 'Ver menos' : `Ver los ${rows.length} días`}</button>` : ''}</section>`;
+}
+function dChartHtml(P){
+  const m = dMes, a0 = dayN(m + '-01'), a1 = dayN(dMesFin(m)), fin = dMesFin(m);
+  const inM = [...P].filter(([f]) => f >= m + '-01' && f <= fin);
+  if (!inM.length) return `<section class="panel"><div class="ph"><h2>Tendencia</h2></div><p class="empty">Sin pesajes en ${esc(fmtD(m + '-01', {month: 'long'}))}.</p></section>`;
+  const before = [...P].filter(([f]) => f < m + '-01').pop();
+  const pts = (before && dayN(before[0]) >= a0 - 10 ? [before] : []).concat(inM).map(([f, kg]) => ({x: dayN(f), y: kg}));
+  const x0 = Math.min(a0, pts[0].x), x1 = a1;
+  const avgs = [], bm = dBaseMes(m, P);
+  if (bm && dayN(bm.f) >= x0) avgs.push({x: dayN(bm.f), y: bm.v});
+  dMesSemanas(m).forEach(s => { const v = dSemVal(s, P); if (v != null && s.wd <= today() && !avgs.some(p => p.x === dayN(s.wd))) avgs.push({x: dayN(s.wd), y: v}); });
+  avgs.sort((p, q) => p.x - q.x);
+  const fm = dFaseMes(m), fa = dCfg().fase || {}, mn = +(fa.ritmo_min || .5), mx = +(fa.ritmo_max || .7);
+  let band = null;
+  if (fm){
+    const S0 = dayN(fm.ini), base = dStartKg(P) != null ? dStartKg(P) : pts[0].y, bx0 = Math.max(S0, x0), bx1 = Math.min(dayN(fm.fin), x1);
+    if (bx1 > bx0) band = [bx0, bx1].map(x => ({x, hi: base - mn*(x - S0)/7, lo: base - mx*(x - S0)/7}));
+  }
+  const ys = pts.map(p => p.y).concat(band ? band.flatMap(b => [b.hi, b.lo]) : []);
+  let y0 = Math.floor((Math.min(...ys) - .3)*2)/2, y1 = Math.ceil((Math.max(...ys) + .3)*2)/2;
+  if (y1 - y0 < 2){ const md = (y0 + y1)/2; y0 = Math.floor((md - 1)*2)/2; y1 = Math.ceil((md + 1)*2)/2; }
+  const Wd = 680, H = 250, L = 44, R = 14, T = 12, B = 30;
+  const sx = x => L + (x - x0)/(x1 - x0 || 1)*(Wd - L - R), sy = y => T + (y1 - y)/(y1 - y0)*(H - T - B);
+  const step = (y1 - y0) > 4 ? 1 : .5;
+  let g = '';
+  for (let v = y0; v <= y1 + 1e-9; v += step) g += `<line x1="${L}" x2="${Wd - R}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--line)"/><text x="${L - 8}" y="${sy(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${kgf(v)}</text>`;
+  for (let xv = x0; xv <= x1; xv++){ if (isoDow(fromN(xv)) !== 1) continue; g += `<line x1="${sx(xv)}" x2="${sx(xv)}" y1="${T}" y2="${H - B}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${sx(xv) + 3}" y="${H - 10}" font-size="11" fill="var(--muted)">${esc(fmtD(fromN(xv)))}</text>`; }
+  const poly = band ? `<polygon points="${sx(band[0].x)},${sy(band[0].hi)} ${sx(band[1].x)},${sy(band[1].hi)} ${sx(band[1].x)},${sy(band[1].lo)} ${sx(band[0].x)},${sy(band[0].lo)}" fill="var(--good-dim)"/>` : '';
+  const dots = pts.map(p => `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="3.5" fill="var(--muted)"><title>${esc(fmtD(fromN(p.x), {weekday: 'short', day: 'numeric', month: 'short'}))}: ${kgf(p.y, 2)} kg</title></circle>`).join('');
+  const line = avgs.length > 1 ? `<polyline points="${avgs.map(p => `${sx(p.x)},${sy(p.y)}`).join(' ')}" fill="none" stroke="var(--fg)" stroke-width="2.5" stroke-linejoin="round"/>` : '';
+  const aDots = avgs.map((p, i) => `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="${i === avgs.length - 1 ? 6 : 4.5}" fill="var(--fg)" stroke="var(--panel)" stroke-width="2"><title>Pesaje semanal: ${kgf(p.y, 2)} kg</title></circle>`).join('');
+  return `<section class="panel"><div class="ph"><h2>Tendencia</h2><span class="lbl">${esc(mesLabel(m))}</span></div><div class="dchart"><svg viewBox="0 0 ${Wd} ${H}" role="img" aria-label="Pesajes del mes">${g}${poly}${dots}${line}${aDots}</svg></div>
+    <div class="dleg"><span><i style="background:var(--muted)"></i>Pesajes sueltos</span><span><i style="background:var(--fg)"></i>Pesaje semanal</span>${band ? `<span><i style="background:var(--good-dim)"></i>Ritmo objetivo (−${kgf(mn, 1)} a −${kgf(mx, 1)} kg/sem)</span>` : ''}</div></section>`;
+}
+function dSemanasHtml(P, F){
+  const ws = dMesSemanas(dMes), t = today();
+  const html = ws.map((s, i) => {
+    const a = dSemVal(s, P), pv = dSemVal(dSemPrev(s), P), delta = a != null && pv != null ? a - pv : null, pc = dPaceSem(s, delta);
+    const fk = F.has(s.wd) ? s.wd : [...F.keys()].filter(k => k >= s.lo && k <= s.hi).sort().pop() || null;
+    const fut = s.lo > t, cur = t >= s.lo && t <= s.hi;
+    const slot = fut ? `<div class="dslot"><div class="dph"><span>Todavía no</span></div></div>` : dSlot(s.wd, fk && fk !== s.wd ? capi(fmtD(fk, {weekday: 'short', day: 'numeric'})) : capi(fmtD(s.wd, {weekday: 'short', day: 'numeric'})), fk, F);
+    return `<div class="dweek${cur ? ' cur' : ''}"><div><h3>Semana ${i + 1} <span class="lbl">${esc(fmtD(s.lo))} – ${esc(fmtD(s.hi))}</span></h3><span class="vnota">${a == null ? (fut ? 'Todavía no' : 'Sin pesaje') : kgf(a, 2) + ' kg'}${delta != null ? ' · ' + sgnKg(delta) + ` <span class="pill ${pc.cls}">${pc.txt}</span>` : ''}</span></div>${slot}</div>`;
+  }).join('');
+  const lo = ws.length ? ws[0].lo : dMes + '-01', hi = ws.length ? ws[ws.length - 1].hi : dMesFin(dMes);
+  const keys = [...F.keys()].filter(k => k >= lo && k <= hi).sort();
+  let cmp = '';
+  if (keys.length >= 2){
+    const a = F.get(keys[0]), b = F.get(keys[keys.length - 1]), ua = dSignedUrl(a.path), ub = dSignedUrl(b.path);
+    if (ua && ub) cmp = `<div class="dcmp"><figure><a href="${esc(ua)}" target="_blank" rel="noopener"><img src="${esc(ua)}" alt="Primera foto del mes"></a><figcaption>${esc(fmtD(keys[0], {weekday: 'short', day: 'numeric', month: 'short'}))}</figcaption></figure><figure><a href="${esc(ub)}" target="_blank" rel="noopener"><img src="${esc(ub)}" alt="Última foto del mes"></a><figcaption>${esc(fmtD(keys[keys.length - 1], {weekday: 'short', day: 'numeric', month: 'short'}))}</figcaption></figure></div>`;
+  }
+  return `<section class="panel"><div class="ph"><h2>Semanas y fotos</h2><span class="lbl">Una foto por semana, con el pesaje</span></div><div class="dweeks">${html}</div>${cmp ? '<span class="lbl">Antes y ahora</span>' + cmp : ''}</section>`;
+}
+function dHistHtml(P){
+  const m = dMes, all = [...P], ws = dMesSemanas(m);
+  const rows = all.map((x, i) => ({f: x[0], kg: x[1], prev: i > 0 ? all[i - 1][1] : null})).filter(r => r.f >= m + '-01' && r.f <= dMesFin(m)).reverse();
+  return `<section class="panel"><div class="ph"><h2>Registro de peso</h2><span class="lbl">${esc(mesLabel(m))}</span></div><div class="sec drows">${rows.map(r => { const wi = ws.findIndex(s => r.f >= s.lo && r.f <= s.hi), d = r.prev != null ? r.kg - r.prev : null; return `<div class="row nock"><div class="nm"><b>${esc(capi(fmtD(r.f, {weekday: 'short', day: 'numeric', month: 'short'})))}</b><span>${wi >= 0 ? 'Semana ' + (wi + 1) : ''}${d != null ? (wi >= 0 ? ' · ' : '') + sgnKg(d) : ''}</span></div><div class="am num"><span>${kgf(r.kg, 2)} kg</span><button class="x" type="button" data-dpdel="${r.f}" aria-label="Borrar pesaje del ${esc(fmtD(r.f))}">×</button></div></div>`; }).join('') || '<p class="empty">Sin pesajes este mes.</p>'}</div></section>`;
+}
 function renderDietaPg(){
   const box = $('dieta-pg');
   if (!M.ok || !dietCfg){ box.innerHTML = `<p class="empty">${M.err ? 'No pude traer tu dieta. Revisá la conexión.' : 'Cargando tu dieta…'}</p>`; return; }
-  const P = dPesos(), F = dFotos();
+  const P = dPesos(), F = dFotos(), cur = dMes === today().slice(0, 7);
   keepTyping(box, () => {
-    box.innerHTML = dFaseHtml(P) + `<div class="tcols"><div class="side">${dComidasHtml()}${dDiasHtml()}</div><div class="side">${dPesajeHtml(P, F)}${dChartHtml(P)}${dGastoHtml(P)}${dSemanasHtml(P, F)}${dHistHtml(P)}${dReglasHtml()}</div></div>`;
+    box.innerHTML = dMesHtml(P) + `<div class="tcols"><div class="side">${dComidasHtml()}${dDiasHtml()}</div><div class="side">${cur ? dPesajeHtml(P, F) : ''}${dChartHtml(P)}${cur ? dGastoHtml(P) : ''}${dSemanasHtml(P, F)}${dHistHtml(P)}${dReglasHtml()}</div></div>`;
   });
 }
 
@@ -2679,12 +2767,13 @@ function dDel(table, arr, row, label){
   pmsg(`Borré ${label}.`, '', `<button class="undo" type="button" data-dundo>Deshacer</button>`);
 }
 function dClearFoto(){ dFoto = null; if (dFotoUrl){ URL.revokeObjectURL(dFotoUrl); dFotoUrl = null; } }
-function dSelect(f){ if (!f) return; if (f > today()) f = today(); dDia = f; dClearFoto(); pmsg(''); render(); }
+function dSelect(f){ if (!f) return; if (f > today()) f = today(); dDia = f; dMes = f.slice(0, 7); dClearFoto(); pmsg(''); render(); }
 document.addEventListener('click', e => {
   if (page !== 'dieta') return;
   const q = s => e.target.closest(s);
   let b;
   if ((b = q('[data-dnav]'))){ dSelect(addDays(dDia, +b.dataset.dnav)); return; }
+  if ((b = q('[data-dmes]'))){ const nm = mesMas(dMes + '-01', +b.dataset.dmes).slice(0, 7); if (nm <= today().slice(0, 7)){ dMes = nm; dDia = nm === today().slice(0, 7) ? today() : dMesFin(nm); dVerDias = false; dClearFoto(); render(); } return; }
   if ((b = q('[data-ddia]'))){ dSelect(b.dataset.ddia); const el = $('d-comidas'); if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'}); return; }
   if (q('[data-dverdias]')){ dVerDias = !dVerDias; render(); return; }
   if (q('[data-dreco]')){ dReco(dDia); return; }
@@ -2772,10 +2861,10 @@ function mudarPaneles(p){
   if (p === 'socio'){
     const d = $('pgb-socio-b');
     if (jv.parentNode !== d){ d.insertBefore(jv, d.firstChild); }
-    jv.classList.add('inl'); jv.hidden = false; fab.hidden = true;
+    jv.classList.add('jvin'); jv.hidden = false; fab.hidden = true;
     renderJv();
-  } else if (jv.classList.contains('inl')){
-    jv.classList.remove('inl'); document.body.insertBefore(jv, fab.nextSibling); jv.hidden = true; fab.hidden = false;
+  } else if (jv.classList.contains('jvin')){
+    jv.classList.remove('jvin'); document.body.insertBefore(jv, fab.nextSibling); jv.hidden = true; fab.hidden = false;
   }
 }
 
@@ -2785,7 +2874,8 @@ const AREAS = [
   {k: 'trabajo_finanzas', n: 'Trabajo y finanzas', s: 'Trabajo'},
   {k: 'educativa_cultural', n: 'Estudio y cultura', s: 'Estudio'},
   {k: 'emocional', n: 'Emocional', s: 'Emocional'},
-  {k: 'familia_amor', n: 'Familia y amor', s: 'Familia'},
+  {k: 'pareja', n: 'Pareja', s: 'Pareja'},
+  {k: 'familia_amor', n: 'Familia', s: 'Familia'},
   {k: 'ocio_amistad', n: 'Amigos y ocio', s: 'Amigos'},
   {k: 'tiempo_para_mi', n: 'Tiempo para mí', s: 'Para mí'},
   {k: 'espiritual_etica', n: 'Espiritual y propósito', s: 'Propósito'}
@@ -2864,22 +2954,6 @@ function rRuedaHtml(){
     <div class="rlist">${filas}</div>
     <p class="vnota">Una vez por mes, a conciencia. Tu socio usa la rueda para elegir en qué empujarte.</p></section>`;
 }
-function rSabeHtml(){
-  const s = socio || {};
-  const norte = Array.isArray(s.norte) ? s.norte : [], ver = Array.isArray(s.verdades) ? s.verdades : [];
-  if (!norte.length && !ver.length && !s.prioridades) return '';
-  return `<section class="panel"><div class="ph"><h2>Lo que tu socio tiene presente</h2></div>
-    ${norte.length ? `<div><p class="lbl">Tu norte</p><ul class="sl">${norte.map(x => `<li><span>${esc(x)}</span></li>`).join('')}</ul></div>` : ''}
-    ${s.prioridades ? `<div><p class="lbl">Prioridades</p><p class="rtxt">${esc(s.prioridades)}</p></div>` : ''}
-    ${ver.length ? `<div><p class="lbl">Verdades del momento</p><ul class="sl">${ver.map(x => `<li><span>${esc(x)}</span></li>`).join('')}</ul></div>` : ''}
-  </section>`;
-}
-function renderSocioPg(){
-  const a = $('pgb-socio-r'), b = $('pgb-socio-s');
-  if (!M.ok){ a.innerHTML = `<p class="empty">${M.err ? 'No pude traer tus datos. Revisá la conexión.' : 'Cargando…'}</p>`; return; }
-  keepTyping(a, () => { a.innerHTML = rRuedaHtml(); });
-  b.innerHTML = rSabeHtml();
-}
 function rSet(area, data){
   const cur = M.wheel.find(w => w.mes === rMes && w.area === area);
   if (cur) Object.assign(cur, data); else M.wheel.push(Object.assign({id: uuid(), mes: rMes, area, puntaje: null, nota: null}, data));
@@ -2904,6 +2978,147 @@ document.addEventListener('submit', e => {
   rNota = null;
   rSet(a, {nota: t || null});
   pmsg('Guardado.', 'ok');
+});
+
+/* ---------- Texto con negritas y viñetas (lo que escribe tu socio) ---------- */
+function mdLite(s){ return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^[ \t]*[-*•][ \t]+/gm, '• '); }
+// "2026-11-21T21:05:45Z" → "hoy 18:05" / "ayer 18:05" / "jue 18:05"
+function fmtUpd(s){
+  const t = Date.parse(s || ''); if (!t) return '';
+  const d = new Date(t), f = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), h = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  return (f === today() ? 'hoy' : f === addDays(today(), -1) ? 'ayer' : fmtD(f, {weekday: 'short', day: 'numeric'})) + ' ' + h;
+}
+
+/* ---------- Negocio: recomendaciones con "Aplicar" ---------- */
+let negRecos = {items: {}};
+const hashS = s => { let h = 7; for (const c of String(s)) h = (h*31 + c.charCodeAt(0)) | 0; return 'r' + (h >>> 0).toString(36); };
+const RECO_CUENTA = /(meta ads|\bmeta\b|\bcbo\b|anuncio|campa|presupuesto|precio|tienda|shopify|paus|escal|checkout|p[aá]gina de pago|cowork|\bads\b)/i;
+function recosNeg(){
+  const rs = estado && estado.negocio && Array.isArray(estado.negocio.recomendaciones) ? estado.negocio.recomendaciones : [];
+  return rs.map(r => {
+    const t = typeof r === 'string' ? r : (r && (r.t || r.texto)) || '';
+    return {id: (r && r.id) || hashS(t), t, tipo: (r && r.tipo) || (RECO_CUENTA.test(t) ? 'cuenta' : 'yo'), tarea: (r && r.tarea) || null};
+  }).filter(r => r.t);
+}
+function recoHtml(r){
+  const st = (negRecos.items || {})[r.id];
+  const tk = st && st.task_id ? M.tasks.find(t => t.id === st.task_id) : null;
+  const done = !!st && (st.estado === 'aplicada' || st.estado === 'hecha');
+  let act;
+  if (!st) act = `<button class="btn sm" type="button" data-reco="${esc(r.id)}">Aplicar</button><span class="lbl">${r.tipo === 'cuenta' ? 'Cambio en Meta o la tienda' : 'Va a tu lista de hoy'}</span>`;
+  else if (st.estado === 'aprobada') act = `<span class="pill warn">Aprobada · confirmámela en Claude</span><button class="undo" type="button" data-recox="${esc(r.id)}">Deshacer</button>`;
+  else act = `<span class="pill good">${st.task_id ? (tk && tk.completada ? 'Hecha' : 'En tu lista de hoy') : 'Aplicada'}</span>${st.resultado ? `<span class="lbl">${esc(st.resultado)}</span>` : ''}${st.task_id && !(tk && tk.completada) ? `<button class="undo" type="button" data-recox="${esc(r.id)}">Deshacer</button>` : ''}`;
+  return `<li class="${done ? 'done' : ''}"><div class="rt"><span class="rtx">${esc(r.t)}</span><div class="racts">${act}</div></div></li>`;
+}
+function recoSet(id, v){
+  negRecos = Object.assign({}, negRecos, {items: Object.assign({}, negRecos.items || {})});
+  if (v) negRecos.items[id] = v; else delete negRecos.items[id];
+  render();
+  if (db) db.doc('negocio/recos').mutate(d => { d = d && typeof d === 'object' ? d : {}; d.items = d.items || {}; if (v) d.items[id] = v; else delete d.items[id]; return d; }).catch(() => pmsg('No se pudo guardar.', 'err'));
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-reco]');
+  if (b){
+    const r = recosNeg().find(x => x.id === b.dataset.reco); if (!r) return;
+    if (!M.ok){ pmsg('Todavía no cargó. Probá en un segundo.', 'err'); return; }
+    if (r.tipo === 'yo'){ const t = tNew(r.tarea || r.t, today()); recoSet(r.id, {estado: 'aplicada', tipo: r.tipo, t: r.t, task_id: t.id, en: iso()}); pmsg('Listo: está en tu lista de hoy.', 'ok'); }
+    else { recoSet(r.id, {estado: 'aprobada', tipo: r.tipo, t: r.t, en: iso()}); pmsg('Aprobada. Escribime «dale» en Claude y la aplico.', 'ok'); }
+    return;
+  }
+  const x = e.target.closest('[data-recox]');
+  if (x){
+    const st = (negRecos.items || {})[x.dataset.recox];
+    if (st && st.task_id){ const i = M.tasks.findIndex(t => t.id === st.task_id); if (i >= 0) M.tasks.splice(i, 1); mDo(() => sb.from('tasks').update({eliminado: true}).eq('id', st.task_id)); }
+    recoSet(x.dataset.recox, null); pmsg('Deshecho.', 'ok');
+  }
+});
+
+/* ---------- Metas: editar, eliminar y crear ---------- */
+function metasList(){
+  const man = (manual && manual.valores) || {};
+  const base = estado && Array.isArray(estado.metas) ? estado.metas.filter(m => m && m.id) : [];
+  const extra = (manual && Array.isArray(manual.nuevas) ? manual.nuevas : []).filter(m => m && m.id && !base.some(b => b.id === m.id));
+  return base.concat(extra).filter(m => !(man[m.id] && man[m.id].eliminada)).map(m => man[m.id] && man[m.id].titulo ? Object.assign({}, m, {titulo: man[m.id].titulo}) : m);
+}
+function metaSet(id, patch){
+  const valores = Object.assign({}, manual.valores || {}), cur = Object.assign({}, valores[id] || {}, patch, {en: iso()});
+  valores[id] = cur; manual = Object.assign({}, manual, {valores}); render();
+  if (db) db.doc('manual/metas').mutate(d => { d = d && typeof d === 'object' ? d : {}; d.valores = d.valores || {}; d.valores[id] = Object.assign({}, d.valores[id] || {}, patch, {en: cur.en}); return d; }).catch(() => pmsg('No se pudo guardar la meta.', 'err'));
+}
+document.addEventListener('click', e => {
+  const d = e.target.closest('[data-meta-del]');
+  if (d){ const id = d.dataset.metaDel; editMeta = null; metaSet(id, {eliminada: true}); pmsg('Meta eliminada.', '', `<button class="undo" type="button" data-meta-undo="${esc(id)}">Deshacer</button>`); return; }
+  const u = e.target.closest('[data-meta-undo]');
+  if (u){ metaSet(u.dataset.metaUndo, {eliminada: false}); pmsg('Volvió.', 'ok'); }
+});
+
+/* ---------- Finanzas: gráficos de gastos (como en Routly) ---------- */
+const GRIS = [1, .72, .52, .36, .24, .14];
+function fGastosMes(m){
+  const cot = cotMes(m), tc = cot ? +cot.usd : 0, porCat = {};
+  let tot = 0, ing = 0;
+  movsMes(m).forEach(x => {
+    const v = x.moneda === 'USD' ? (+x.monto || 0)*tc : (+x.monto || 0);
+    if (x.tipo === 'ingreso'){ ing += v; return; }
+    if (x.tipo !== 'gasto') return;
+    const k = String(x.categoria || '').trim() || 'Otros';
+    porCat[k] = (porCat[k] || 0) + v; tot += v;
+  });
+  return {tot, ing, cats: Object.entries(porCat).sort((a, b) => b[1] - a[1])};
+}
+const moneyK = n => { const a = Math.abs(n); return '$ ' + (a >= 1e6 ? nf(n/1e6, 1) + ' M' : a >= 1e3 ? nf(Math.round(n/1e3)) + ' k' : nf(Math.round(n))); };
+function fDonutSvg(cats, tot){
+  const rm = 52, sw = 26, C = 2*Math.PI*rm, gap = cats.length > 1 ? 2 : 0;
+  let off = 0, g = '';
+  cats.forEach(([k, v], i) => {
+    const L = C*v/tot;
+    g += `<circle cx="75" cy="75" r="${rm}" fill="none" stroke="rgba(var(--fg-rgb),${GRIS[i] || .1})" stroke-width="${sw}" stroke-dasharray="${Math.max(0, L - gap).toFixed(2)} ${(C - Math.max(0, L - gap)).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 75 75)"><title>${esc(k)}: ${money(v)}</title></circle>`;
+    off += L;
+  });
+  return `<svg viewBox="0 0 150 150" role="img" aria-label="Gastos por categoría">${g}</svg>`;
+}
+function fEvolSvg(m){
+  const hoyM = today().slice(0, 7), ms = Array.from({length: 6}, (_, i) => mesMas(m + '-01', i - 5).slice(0, 7));
+  const vs = ms.map(x => fGastosMes(x).tot), max = Math.max(1, ...vs);
+  const W = 420, H = 170, top = 24, bot = 26, gap = 14, n = ms.length, bw = (W - gap*(n + 1))/n;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gastos de los últimos 6 meses">` + ms.map((mm, i) => {
+    const v = vs[i], h = (H - top - bot)*v/max, x = gap + i*(bw + gap), y = H - bot - h, sel = mm === m, cur = mm === hoyM;
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2, h).toFixed(1)}" rx="5" fill="${sel ? 'var(--fg)' : 'var(--bar-old)'}"${cur && !sel ? ' stroke="var(--fg)" stroke-dasharray="4 3" stroke-width="1.5"' : ''}><title>${esc(mesLabel(mm))}: ${money(v)}</title></rect>`
+      + `<text x="${(x + bw/2).toFixed(1)}" y="${(y - 7).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)" font-family="Inter, sans-serif">${v ? esc(moneyK(v)) : ''}</text>`
+      + `<text x="${(x + bw/2).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="Inter, sans-serif">${esc(capi(fmtD(mm + '-01', {month: 'short'})).replace('.', ''))}</text>`;
+  }).join('') + `</svg>`;
+}
+function fGraficoHtml(m){
+  const g = fGastosMes(m), top = g.cats.slice(0, 5), rest = g.cats.slice(5).reduce((s, x) => s + x[1], 0);
+  const cats = rest > 0 ? top.concat([['Otros', rest]]) : top;
+  return `<section class="panel"><div class="ph"><h2>Gastos</h2><span class="lbl">${esc(mesLabel(m))}</span></div>
+    <div class="fgraf">
+      <div class="donut">${g.tot ? fDonutSvg(cats, g.tot) : ''}<div class="dside"><div class="kpi"><b class="num">${money(g.tot)}</b><span>Gastado en el mes</span></div>${g.tot ? `<ul class="dleg2">${cats.map(([k, v], i) => `<li><i style="background:rgba(var(--fg-rgb),${GRIS[i] || .1})"></i><span>${esc(k)}</span><b class="num">${money(v)}</b></li>`).join('')}</ul>` : '<p class="empty">Sin gastos anotados este mes.</p>'}</div></div>
+      <div><p class="lbl">Evolución mensual</p><div class="mchart">${fEvolSvg(m)}</div></div>
+    </div></section>`;
+}
+
+/* ---------- Tu socio: tu coach ---------- */
+const COACH_SUGS = ['¿Cómo vengo?', 'Exigime: ¿qué estoy esquivando?', 'Hoy cumplí, ¿me gané algo?', 'Quiero hablar de cómo me siento'];
+function coachHtml(){
+  const t = socio && socio.tablero, ch = (t && t.charla) || (socio && socio.charla) || null;
+  const txt = ch ? (typeof ch === 'string' ? ch : ch.texto || '') : '';
+  const cuando = ch && ch.en ? fmtUpd(ch.en) : ch && ch.fecha ? fmtD(ch.fecha, {weekday: 'short', day: 'numeric'}) : '';
+  return `<section class="panel coach"><div class="ph"><h2>Tu coach</h2><span class="lbl">${esc(cuando)}</span></div>
+    ${txt ? `<div class="ctx">${mdLite(txt)}</div>` : `<p class="empty">Todas las mañanas te dejo acá cómo venís, qué te exijo hoy y una pregunta. A la tarde, si cumpliste, tu premio.</p>`}
+    <div class="sugs">${COACH_SUGS.map(x => `<button class="sug" type="button" data-coach="${esc(x)}">${esc(x)}</button>`).join('')}</div></section>`;
+}
+function renderSocioPg(){
+  const a = $('pgb-socio-r'), c = $('pgb-socio-c');
+  c.innerHTML = coachHtml();
+  if (!M.ok){ a.innerHTML = `<p class="empty">${M.err ? 'No pude traer tus datos. Revisá la conexión.' : 'Cargando…'}</p>`; return; }
+  keepTyping(a, () => { a.innerHTML = rRuedaHtml(); });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-coach]');
+  if (!b) return;
+  jvSend(b.dataset.coach);
+  const j = $('jvp'); if (j && j.classList.contains('jvin')) j.scrollIntoView({behavior: 'smooth', block: 'nearest'});
 });
 
 /* El panel "Plata" de Inicio y los ítems fijo:/compra:/venta: de la lista salen de estas tablas */
@@ -3102,14 +3317,14 @@ function renderJv(){
     .sort((a, b) => a.t - b.t);
   let html = '';
   if (!items.length && !jvBusy){
-    html = `<div class="jvp-empty"><p>Hablame de lo que quieras: cómo estás, una decisión, algo que te trabó. Te contesto al instante. Si me contás que hiciste o comiste algo de la lista, lo tacho yo.</p><div class="sugs">${['¿Cómo vengo hoy?', 'Hoy no tengo ganas', 'Hice cardio', 'Recordame a las 18 estudiar', 'Necesito hablar de algo'].map(x => `<button class="sug" type="button" data-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`;
+    html = `<div class="jvp-empty"><p>Hablame de lo que quieras: cómo estás, una decisión, algo que te trabó. Te contesto al instante. Si me contás que hiciste o comiste algo de la lista, lo tacho yo.</p><div class="sugs">${['¿Cómo vengo hoy?', 'Hoy no tengo ganas', 'Hice cardio', 'Recordame a las 18 estudiar', 'Quiero hablar de cómo me siento'].map(x => `<button class="sug" type="button" data-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`;
   } else {
     html = items.map(x => {
-      if (x.m) return `<div class="bub ${x.m.rol === 'yo' ? 'me' : 'ai'}">${esc(x.m.texto)}</div>`;
+      if (x.m) return `<div class="bub ${x.m.rol === 'yo' ? 'me' : 'ai'}">${mdLite(x.m.texto)}</div>`;
       const p = x.p;
       let st = '';
       if (p.estado === 'pendiente') st = `<div class="acts"><span class="act q">Anotado · ${esc(proxSync())}</span><button class="undo" type="button" data-cancel-ped="${esc(p.id)}">Cancelar</button></div>`;
-      else if (p.estado === 'hecho') st = `<div class="bub ai">${esc(p.resultado || 'Listo.')}</div>`;
+      else if (p.estado === 'hecho') st = `<div class="bub ai">${mdLite(p.resultado || 'Listo.')}</div>`;
       else if (p.estado === 'no_se_pudo') st = `<div class="bub ai err">${esc(p.resultado || 'No se pudo.')}</div>`;
       else if (p.estado === 'cancelado') st = `<div class="acts"><span class="act q" style="text-decoration:line-through">Cancelado</span></div>`;
       return `<div class="bub me">${esc(p.original || p.texto)}</div>${st}`;
@@ -3130,7 +3345,7 @@ function jvGrow(){ const t = $('jvp-in'); t.style.height = '42px'; t.style.heigh
 $('jvp-full').href = PROYECTO;
 $('jv-fab').addEventListener('click', () => jvOpen(true));
 $('jvp-x').addEventListener('click', () => jvOpen(false));
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('jvp').hidden && !$('jvp').classList.contains('inl')) jvOpen(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('jvp').hidden && !$('jvp').classList.contains('jvin')) jvOpen(false); });
 $('jvp-form').addEventListener('submit', e => { e.preventDefault(); e.stopPropagation(); jvSend($('jvp-in').value); });
 $('jvp-in').addEventListener('input', jvGrow);
 $('jvp-in').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && window.matchMedia('(pointer:fine)').matches){ e.preventDefault(); jvSend($('jvp-in').value); } });
@@ -3318,9 +3533,13 @@ function subscribeAll(){
     let c = null; snap.docs.forEach(d => { if (d.id === 'config') c = d.data(); });
     dietCfg = c; render();
   });
+  db.collection('negocio').onSnapshot(snap => {
+    let r = null; snap.docs.forEach(d => { if (d.id === 'recos') r = d.data(); });
+    negRecos = r && r.items ? r : {items: {}}; render();
+  });
   db.collection('manual').onSnapshot(snap => {
     let m = null; snap.docs.forEach(d => { if (d.id === 'metas') m = d.data(); });
-    manual = m && m.valores ? m : {valores:{}}; loaded.m = true; render();
+    manual = m && typeof m === 'object' ? Object.assign({valores: {}}, m) : {valores: {}}; loaded.m = true; render();
   });
 }
 
