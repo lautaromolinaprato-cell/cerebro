@@ -374,7 +374,7 @@ body:has(.login:not([hidden])){overflow:hidden}
 .jvp-q.live{color:var(--accent)}
 @media (max-width:560px){
   .jvp{right:0;bottom:0;width:100vw;height:86vh;border-radius:16px 16px 0 0}
-  .jv-fab{right:14px;bottom:14px}
+  .jv-fab{right:14px;bottom:calc(78px + env(safe-area-inset-bottom))}
 }
 
 @media (max-width:880px){.cols{grid-template-columns:1fr}}
@@ -388,6 +388,126 @@ body:has(.login:not([hidden])){overflow:hidden}
   .panel{padding:16px}
   .jarvis{font-size:17.5px}
 }
+
+/* Páginas: Tareas y Hábitos */
+.wrap[hidden]{display:none}
+.pgh{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap}
+.pgh h1{font-size:clamp(30px,5vw,42px);margin-right:auto}
+.per{display:flex;align-items:center;gap:6px}
+.per .pl{min-width:150px;text-align:center;font-weight:700;font-size:15px}
+.per .pl::first-letter{text-transform:uppercase}
+.nb{all:unset;box-sizing:border-box;cursor:pointer;width:36px;height:36px;border-radius:10px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--fg)}
+.nb:hover{border-color:var(--line3)}
+.nb:disabled{opacity:.3;cursor:default}
+.nb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.nb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.sm{padding:7px 12px;font-size:14px}
+.seg.big button{font-size:14px;padding:6px 14px}
+.chips.seg{flex-wrap:wrap;border-radius:14px}
+select{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0;max-width:100%}
+.add select{flex:0 1 150px}
+.tcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:880px){.tcols{grid-template-columns:1fr}}
+.it[draggable="true"]{cursor:grab}
+.it.drag{opacity:.35}
+.drop{outline:2px dashed var(--line3);outline-offset:3px}
+.it.pb .hr{display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.it.now{background:var(--accent-dim);border-radius:10px;padding-left:8px;padding-right:8px}
+.it.now .hr{color:var(--fg)}
+.bform{display:grid;gap:10px;width:100%}
+.it.pb .bform{grid-column:1/-1}
+.brow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.brow .mvl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.brow .mvl input{width:auto;padding:7px 8px;color-scheme:var(--scheme)}
+.dsel{display:flex;gap:5px;flex-wrap:wrap}
+.dsel label{position:relative}
+.dsel input{position:absolute;opacity:0;width:1px;height:1px}
+.dsel span{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;border:1px solid var(--line2);font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.dsel input:checked + span{background:var(--inv-bg);color:var(--inv-fg);border-color:var(--inv-bg)}
+.dsel input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+/* Semana de tareas */
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;align-items:start}
+@media (max-width:1100px){.wk{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.wk{grid-template-columns:1fr}}
+.wd{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;display:grid;gap:6px;align-content:start;min-width:0;min-height:130px}
+.wd.hoy{border-color:var(--fg)}
+.wdh{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:8px;border-radius:6px}
+.wdh b{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.wdh span{font-size:22px;font-weight:800;line-height:1}
+.wdh em{font-style:normal;margin-left:auto;font-size:12px;color:var(--muted)}
+.wd.hoy .wdh b{color:var(--fg)}
+.wdh:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.list.sm .it{padding:7px 0;gap:8px}
+.list.sm .t{font-size:14px}
+.list.sm .ck{width:20px;height:20px;border-radius:6px;margin-top:0}
+.list.sm .ck svg{width:12px;height:12px}
+.wd .inl{flex-direction:column;align-items:stretch}
+.wd .inl .mvl input{width:100%}
+.wadd input{padding:7px 10px;font-size:14px;border-style:dashed}
+/* Mes de tareas */
+.mcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.mcal .dw{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+.mc{all:unset;box-sizing:border-box;cursor:pointer;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 7px;min-height:98px;display:flex;flex-direction:column;gap:3px;min-width:0;overflow:hidden;position:relative}
+.mc:hover{border-color:var(--line3)}
+.mc:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mc.out{opacity:.38}
+.mc.hoy{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.mc .mcd{font-size:13px;font-weight:800}
+.mc .mct{font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc .mct.done{color:var(--muted);text-decoration:line-through}
+.mc .mcm{font-size:11.5px;color:var(--muted)}
+.mc .mcn{display:none}
+@media (max-width:700px){
+  .mc{min-height:54px;padding:5px;align-items:center}
+  .mc .mct,.mc .mcm{display:none}
+  .mc .mcn{display:grid;place-items:center;min-width:20px;height:20px;border-radius:999px;background:var(--inv-bg);color:var(--inv-fg);font-size:11.5px;font-weight:700;padding:0 5px}
+  .mc .mcn.ok{background:var(--soft);color:var(--muted)}
+}
+/* Hábitos */
+.hgrid{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.hgrid table{border-collapse:collapse;width:100%}
+.hgrid th{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0 3px 8px;text-align:center;white-space:nowrap;line-height:1.3}
+.hgrid th.hoy{color:var(--fg)}
+.hgrid th .num{font-size:13px;letter-spacing:0}
+.hgrid td{padding:5px 3px;text-align:center;border-top:1px solid var(--line);vertical-align:middle}
+.hgrid .hn{text-align:left;position:sticky;left:0;z-index:1;background:var(--panel);padding-right:12px;min-width:150px;max-width:220px}
+.hgrid .hnm{display:block;font-weight:600;font-size:14.5px;line-height:1.3}
+.hgrid .hs{text-align:right;padding-left:12px;white-space:nowrap;min-width:84px}
+.hgrid .hs b{font-size:15px}
+.hgrid .hs .bar{height:5px;margin-top:5px}
+.hgrid .sub{font-size:12.5px;margin-top:1px}
+.hc{all:unset;box-sizing:border-box;cursor:pointer;width:32px;height:32px;border-radius:9px;border:1.5px solid var(--line3);display:inline-grid;place-items:center;transition:background .15s,border-color .15s}
+.hc svg{width:16px;height:16px;fill:none;stroke:var(--inv-fg);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.hc.on{background:var(--inv-bg);border-color:var(--inv-bg)}
+.hc.on svg{opacity:1}
+.hc:hover:not(:disabled){border-color:var(--fg)}
+.hc:disabled{opacity:.2;cursor:default}
+.hc:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hc.sm{width:20px;height:20px;border-radius:5px;border-width:1px}
+.hc.sm svg{width:11px;height:11px}
+.hgrid.mes td{padding:4px 1px}
+.hgrid.mes th{padding:0 1px 8px}
+.hico{margin-right:6px}
+.hed{display:grid;gap:8px}
+.hrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hrow input{flex:1 1 200px}
+.kpi b.good,.hs b.good{color:var(--good)} .kpi b.warn,.hs b.warn{color:var(--warn)} .kpi b.bad,.hs b.bad{color:var(--bad)}
+.mchart svg{max-height:140px}
+#t-msg:empty,#h-msg:empty{min-height:0;margin-top:-24px}
+.list.sm .t{overflow-wrap:break-word;word-break:normal;hyphens:auto}
+.hsm{display:none}
+@media (max-width:560px){
+  .add input[type=text]{flex:1 1 100%}
+  .hgrid.sem .hs{display:none}
+  .hgrid.sem .hsm{display:inline}
+  .hgrid.sem .hn{min-width:104px;max-width:130px;padding-right:6px}
+  .hgrid.sem .hnm{font-size:13.5px}
+  .hgrid.sem td{padding:4px 1px}
+  .hgrid.sem .hc{width:29px;height:29px;border-radius:8px}
+  .hgrid.sem th{padding:0 1px 8px}
+  .wd{min-height:0}
+}
+@media (max-width:560px){.per .pl{min-width:0;flex:1}.per{width:100%}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -395,7 +515,8 @@ body:has(.login:not([hidden])){overflow:hidden}
 <nav class="side-nav" aria-label="Secciones">
   <div class="brand"><span class="jv-orb" aria-hidden="true"></span><span>Cerebro</span></div>
   <button class="nv" type="button" data-go="sec-top"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><span>Hoy</span></button>
-  <button class="nv" type="button" data-go="sec-hab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2.2 1.2-3.5 2.3-4.5 0 2 1 3.2 2.2 3.2 0-3.4-1-5.4 0-8.2z"/></svg><span>Hábitos</span></button>
+  <button class="nv" type="button" data-page="tareas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4M8.5 14.5l2 2 4-4"/></svg><span>Tareas</span></button>
+  <button class="nv" type="button" data-page="habitos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2.2 1.2-3.5 2.3-4.5 0 2 1 3.2 2.2 3.2 0-3.4-1-5.4 0-8.2z"/></svg><span>Hábitos</span></button>
   <button class="nv" type="button" data-go="sec-diet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v7a2 2 0 0 0 4 0V3M9 12v9M17 3c-2 0-3.2 3-3.2 6.2 0 2.4 1.2 3.8 3.2 3.8v8"/></svg><span>Dieta</span></button>
   <button class="nv" type="button" data-go="sec-neg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M11 20V5M17 20v-5M3 20h18"/></svg><span>Negocio</span></button>
   <button class="nv" type="button" data-go="sec-metas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/></svg><span>Metas</span></button>
@@ -406,12 +527,12 @@ body:has(.login:not([hidden])){overflow:hidden}
 </nav>
 <nav class="tab-bar" aria-label="Secciones">
   <button class="tb" type="button" data-go="sec-top"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><span>Hoy</span></button>
-  <button class="tb" type="button" data-go="sec-metas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/></svg><span>Metas</span></button>
-  <button class="tb" type="button" data-go="sec-fin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.2V16c3 2 7 2 10 0v-4.8"/></svg><span>Finales</span></button>
+  <button class="tb" type="button" data-page="tareas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4M8.5 14.5l2 2 4-4"/></svg><span>Tareas</span></button>
+  <button class="tb" type="button" data-page="habitos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2.2 1.2-3.5 2.3-4.5 0 2 1 3.2 2.2 3.2 0-3.4-1-5.4 0-8.2z"/></svg><span>Hábitos</span></button>
   <button class="tb" type="button" data-go="sec-plata"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 14.5h2"/></svg><span>Plata</span></button>
   <button class="tb" type="button" data-go="sec-socio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.6L18.4 9l-4.6 1.4L12 15l-1.8-4.6L5.6 9l4.6-1.4z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg><span>Socio</span></button>
 </nav>
-<div class="wrap">
+<div class="wrap" id="pg-inicio">
   <section class="top" id="sec-top" aria-label="Resumen del día">
     <div class="ring" id="ring">
       <div class="c"><span class="pct num" id="ring-pct">0<small>%</small></span><span class="of num" id="ring-of">Cargando…</span></div>
@@ -443,7 +564,7 @@ body:has(.login:not([hidden])){overflow:hidden}
     </section>
 
     <section class="panel" id="sec-hab" aria-labelledby="h-sem">
-      <div class="ph"><h2 id="h-sem">Hábitos de la semana</h2><span class="lbl num" id="sem-rango"></span></div>
+      <div class="ph"><h2 id="h-sem">Hábitos de la semana</h2><span class="lbl num" id="sem-rango"></span><button class="linkb" type="button" data-page="habitos" style="margin-left:0">Abrir</button></div>
       <div class="habs" id="semana"><p class="empty">Cargando hábitos…</p></div>
     </section>
 
@@ -483,8 +604,22 @@ body:has(.login:not([hidden])){overflow:hidden}
 
   <footer class="foot">
     <span id="gen"></span>
-    <span id="sync">Lo que tachás acá pasa a Routly a las 7:45, 12:45, 18:00 y 00:01.</span>
+    <span id="sync">Tareas y hábitos se guardan al instante. Comidas y peso pasan a Mini Cut a las 7:45, 12:45, 18:00 y 00:01.</span>
   </footer>
+</div>
+
+<div class="wrap" id="pg-tareas" hidden>
+  <div class="pgh"><h1>Tareas</h1><div class="seg big" id="t-seg" role="group" aria-label="Vista"></div></div>
+  <div class="pgh"><div class="per"><button class="nb" type="button" data-tnav="-1" aria-label="Anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="pl" id="t-lbl" aria-live="polite"></span><button class="nb" type="button" data-tnav="1" aria-label="Siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button><button class="btn ghost sm" type="button" data-tnav="0">Hoy</button></div><div class="seg chips" id="t-proj" role="group" aria-label="Proyecto"></div></div>
+  <p class="msg" id="t-msg" role="status" aria-live="polite"></p>
+  <div id="tareas" style="display:grid;gap:22px"><p class="empty">Cargando tus tareas…</p></div>
+</div>
+
+<div class="wrap" id="pg-habitos" hidden>
+  <div class="pgh"><h1>Hábitos</h1><div class="seg big" id="h-seg" role="group" aria-label="Vista"></div></div>
+  <div class="pgh"><div class="per"><button class="nb" type="button" data-hnav="-1" aria-label="Anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="pl" id="h-lbl" aria-live="polite"></span><button class="nb" type="button" data-hnav="1" id="h-next" aria-label="Siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button><button class="btn ghost sm" type="button" data-hnav="0">Hoy</button></div><button class="btn ghost sm" type="button" data-hedit>Editar hábitos</button></div>
+  <p class="msg" id="h-msg" role="status" aria-live="polite"></p>
+  <div id="habitos" style="display:grid;gap:22px"><p class="empty">Cargando tus hábitos…</p></div>
 </div>
 
 <button class="jv-fab" id="jv-fab" type="button" aria-haspopup="dialog" aria-controls="jvp"><span class="jv-orb" aria-hidden="true"></span><span>Hablemos</span><span class="jv-badge num" id="jv-badge" hidden></span></button>
@@ -628,19 +763,19 @@ let openRef = null, editMeta = null, justRef = null, writeChain = Promise.resolv
 let manana = null, vista = 'hoy', movRef = null;
 let estadoRaw = null, mananaRaw = null, agendaRaw = null, diaVisto = '';
 // Si todavía no hay plan para mañana, un borrador para planificarlo cuando quieras: tus hábitos de hoy
-// (mismas horas) y las tareas de Routly de mañana (cerebro/agenda). Lo que muevas, saques o agregues
+// (mismas horas) y tus tareas de mañana (tabla tasks). Lo que muevas, saques o agregues
 // queda en ticks/{mañana} y la corrida de las 00:01 arma el plan respetándolo.
 function borradorManana(e, ag){
   if (!e || !e.fecha) return null;
   const f = addDays(e.fecha, 1), bl = [], sinHora = [];
-  ((ag && ag.dias && ag.dias[f]) || []).forEach(t => {
+  agendaDia(f).forEach(t => {
     if (!t || !t.ref || t.hecha) return;
-    const it = {ref: t.ref, texto: t.titulo, tipo: /estudi|m[ée]todos|repaso|final|esquema/i.test(t.titulo || '') ? 'estudio' : 'tarea'};
+    const it = {ref: t.ref, texto: t.titulo, tipo: tipoDe(t.titulo)};
     const m = /\b(\d{1,2})[:.](\d{2})\b/.exec(t.titulo || '');
     if (m && +m[1] < 24) bl.push({hora: m[1].padStart(2, '0') + ':' + m[2], titulo: '', items: [it]});
     else sinHora.push(it);
   });
-  if (sinHora.length) bl.unshift({hora: '', titulo: 'Tareas de Routly · ponéles hora', items: sinHora});
+  if (sinHora.length) bl.unshift({hora: '', titulo: 'Tareas · ponéles hora', items: sinHora});
   (Array.isArray(e.bloques) ? e.bloques : []).forEach(b => {
     if (!/^\d{2}:\d{2}$/.test(b.hora || '')) return;
     const its = (b.items || []).filter(i => i && /^habit:/.test(i.ref)).map(i => ({ref: i.ref, texto: i.texto, tipo: i.tipo || 'habito'}));
@@ -685,6 +820,7 @@ function tickOf(ref, f){
 }
 function isDone(it){
   if (isPlataRef(it.ref)) return plataDone(it.ref);
+  const md = mDone(it.ref, it._f || listDate()); if (md != null) return md;
   const t = tickOf(it.ref, it._f); return t ? !!t.hecho : !!it.hecho;
 }
 function nuevasPend(f){
@@ -692,7 +828,7 @@ function nuevasPend(f){
   return ticksDoc(f).nuevas.filter(n => n && n.id && !synced.has(n.id));
 }
 /* Orden por hora: "10:00" exacto; si no, una hora aproximada por el nombre del bloque */
-const HORA_KEY = [[/levant|arranque|desayun|temprano/i, 450], [/mañana/i, 540], [/mediod|almuer/i, 780], [/comida/i, 790], [/tarde|merienda/i, 930], [/noche|cerr|cena/i, 1260], [/^hoy$|agregad/i, 1400]];
+const HORA_KEY = [[/^tareas/i, 1390], [/levant|arranque|desayun|temprano/i, 450], [/mañana/i, 540], [/mediod|almuer/i, 780], [/comida/i, 790], [/tarde|merienda/i, 930], [/noche|cerr|cena/i, 1260], [/^hoy$|agregad/i, 1400]];
 function horaMin(h){
   const m = /^(\d{1,2}):(\d{2})/.exec(String(h || '').trim());
   if (m) return (+m[1]) * 60 + (+m[2]);
@@ -711,10 +847,15 @@ function bloques(v){
     blk.items.push(it);
   };
   // it._f: día de la lista (para tachar); it._mf: día cuyo ticks guarda su movimiento
+  const seen = new Set(), rawRefs = new Set();
+  raw.forEach(b => (Array.isArray(b.items) ? b.items : []).forEach(i => { if (i && i.ref) rawRefs.add(i.ref); }));
   const place = (it, home, movDoc) => {
-    if (oc.has(it.ref)) return;
+    if (oc.has(it.ref) || seen.has(it.ref)) return;
     const m = movDoc.mov[it.ref];
     if (m && m.fecha && m.fecha !== f) return;
+    // Las tareas viven en su tabla: si la borraste o la pasaste a otro día, no va en esta lista
+    if (M.ok && /^task:/.test(it.ref)){ const t = taskById(it.ref.slice(5)); if (!t || (t.fecha !== f && !(m && m.fecha === f))) return; }
+    seen.add(it.ref);
     const x = Object.assign({}, it, {_f: f, _mf: movDoc.fecha});
     if (m && /^\d{2}:\d{2}$/.test(m.hora || '')){ x._hora = m.hora; enHora(m.hora, x); return; }
     if (home) home.items.push(x); else enHora(it._hDef || 'Hoy', x);
@@ -729,11 +870,15 @@ function bloques(v){
     (estado && Array.isArray(estado.bloques) ? estado.bloques : []).forEach(b => (b.items || []).forEach(i => { if (i && i.ref && !ohoy.has(i.ref) && th.mov[i.ref] && th.mov[i.ref].fecha === f) vienen.push(Object.assign({}, i, {_hDef: 'Movido de hoy'})); }));
     nuevasPend(hoy).forEach(n => { const r = 'nueva:' + n.id; if (th.mov[r] && th.mov[r].fecha === f) vienen.push(Object.assign(nueva(n), {_hDef: 'Movido de hoy'})); });
     vienen.forEach(it => {
-      if (oc.has(it.ref)) return;
       const m = th.mov[it.ref], x = Object.assign({}, it, {_f: f, _mf: hoy});
+      if (oc.has(it.ref) || seen.has(it.ref)) return;
+      seen.add(it.ref);
       if (/^\d{2}:\d{2}$/.test(m.hora || '')){ x._hora = m.hora; enHora(m.hora, x); } else enHora(it._hDef, x);
     });
   }
+  // Tus tareas de ese día que tu socio no puso en el plan (las que agregás o movés)
+  if (M.ok) M.tasks.filter(t => t.fecha === f && !rawRefs.has('task:' + t.id)).sort(byOrden)
+    .forEach(t => place({ref: 'task:' + t.id, texto: t.titulo, tipo: tipoDe(t.titulo), hecho: !!t.completada, _hDef: 'Tareas'}, null, td));
   let last = -1;
   const keyed = out.filter(b => b.items.length).map((b, i) => { let k = horaMin(b.hora); if (k == null) k = last; last = k; return {b, k, i}; });
   keyed.sort((a, b) => a.k - b.k || a.i - b.i);
@@ -766,6 +911,7 @@ function setTick(ref, hecho, valor){
   items[ref] = v;
   justRef = hecho ? ref : null;
   saveTicks(Object.assign({}, doc, {items}), d => { d.items[ref] = v; });
+  mMark(ref, hecho, doc.fecha);
 }
 /* Mover un ítem de hora o de día. Se guarda en el ticks del día donde vive el ítem (mf). */
 function guardarMov(ref, mf, h, d){
@@ -776,8 +922,9 @@ function guardarMov(ref, mf, h, d){
   const doc = ticksDoc(mf), mov = Object.assign({}, doc.mov);
   if (has) mov[ref] = val; else delete mov[ref];
   movRef = null;
+  if (M.ok && /^task:/.test(ref)){ const t = taskById(ref.slice(5)), nf = val.fecha || mf; if (t && t.fecha !== nf) tSet(t.id, {fecha: nf, orden: nextOrden(nf)}); }
   saveTicks(Object.assign({}, doc, {mov}), dd => { dd.mov = dd.mov && typeof dd.mov === 'object' ? dd.mov : {}; if (has) dd.mov[ref] = val; else delete dd.mov[ref]; });
-  const rt = /^(task|nueva):/.test(ref) ? ' En Routly se cambia en la próxima sincronización.' : '';
+  const rt = '';
   msg(val.fecha ? `Movido al ${fmtD(val.fecha, {weekday:'long', day:'numeric'})}${val.hora ? ' a las ' + val.hora : ''}.${rt}` : val.hora ? `Movido a las ${val.hora}.` : 'Volvió a su lugar.', 'ok');
 }
 function toggle(ref){
@@ -795,7 +942,7 @@ function toggle(ref){
   if (!done && (it.pide === 'kg' || it.pide === 'comida')){ openRef = openRef === ref ? null : ref; render(); focusOpen(); return; }
   openRef = null;
   setTick(ref, !done);
-  msg(!done ? '¡Tachado! Se pasa a Routly en la próxima sincronización.' : 'Desmarcado.', !done ? 'ok' : '');
+  msg(!done ? (mDone(ref) != null ? '¡Hecho!' : '¡Tachado! Pasa a Mini Cut en la próxima sincronización.') : 'Desmarcado.', !done ? 'ok' : '');
 }
 function focusOpen(){ setTimeout(() => { const i = document.querySelector('.inl input'); if (i) i.focus(); }, 30); }
 
@@ -885,7 +1032,7 @@ function renderHoy(){
   $('hoy-cnt').textContent = v === 'manana' ? fmtD(manana.fecha, {weekday:'short', day:'numeric'}) : (its.length ? `${dn}/${its.length}` : '');
   const nota = $('vista-nota'); nota.hidden = v !== 'manana';
   if (v === 'manana') nota.textContent = manana.borrador
-    ? 'Borrador: tus hábitos y las tareas de Routly de mañana. Ponéles hora, sacá o agregá: a las 00:01 tu socio arma el plan con eso.'
+    ? 'Borrador: tus hábitos y tus tareas de mañana. Ponéles hora, sacá o agregá: a las 00:01 tu socio arma el plan con eso.'
     : (manana.foco ? 'Foco: ' + manana.foco + ' · ' : '') + 'Lo que te propone tu socio. Movelo o sacalo: a las 00:01 pasa a ser tu lista de hoy.';
   $('add-in').placeholder = v === 'manana' ? 'Agregar algo para mañana' : 'Agregar algo para hoy';
   // conservar lo que se está escribiendo en un formulario abierto
@@ -956,6 +1103,16 @@ function renderFinales(){
 
 function renderSemana(){
   const box = $('semana');
+  if (M.ok && hActivos().length){
+    const ini = wkStart(today()), esp = Math.max(0, Math.min(1, (dayN(today()) - dayN(ini) + 1)/7));
+    $('sem-rango').textContent = `Desde el ${fmtD(ini, {weekday:'short', day:'numeric'})}`;
+    box.innerHTML = hActivos().map(h => {
+      let hec = 0; for (let i = 0; i < 7; i++) if (hOn(h.id, addDays(ini, i))) hec++;
+      const meta = +h.meta_semanal || 7, p = Math.min(1, hec/meta), ok = hec >= meta, tone = ok ? 'good' : paceTone(p, esp);
+      return `<div class="hab${ok ? ' ok' : ''}"><span>${esc(h.nombre)}</span><span class="n num ${ok ? '' : tone}">${hec}/${meta}</span><div class="bar ${tone}"><i style="width:${Math.max(Math.round(p*100), tone === 'bad' ? 3 : 0)}%"></i></div></div>`;
+    }).join('');
+    return;
+  }
   const s = estado && estado.semana;
   const hs = s && Array.isArray(s.habitos) ? s.habitos : [];
   $('sem-rango').textContent = s && s.desde ? `Desde el ${fmtD(s.desde, {weekday:'short', day:'numeric'})}` : '';
@@ -1031,14 +1188,14 @@ function renderSocio(){
 }
 
 function renderFoot(){
-  $('gen').textContent = estado && estado.generado ? `Datos de Routly y Mini Cut al ${new Date(estado.generado).toLocaleString('es-AR', {weekday:'short', hour:'2-digit', minute:'2-digit'})}` : '';
-  if (estado && estado.sync_nota) $('sync').textContent = estado.sync_nota;
+  $('gen').textContent = estado && estado.generado ? `Plan de tu socio al ${new Date(estado.generado).toLocaleString('es-AR', {weekday:'short', hour:'2-digit', minute:'2-digit'})}` : '';
 }
 
 function render(){
   armarDia();
   renderTop(allItems('hoy'));
   renderHoy(); renderNegocio(); renderMetas(); renderPlata(); renderFinales(); renderSemana(); renderDieta(); renderSocio(); renderFoot();
+  if (page === 'tareas') renderTareas(); else if (page === 'habitos') renderHabitos();
 }
 
 /* ---------- Eventos ---------- */
@@ -1101,6 +1258,15 @@ document.addEventListener('submit', e => {
     if (!t) return;
     const doc = ticksDoc();
     const hora = /^\d{2}:\d{2}$/.test($('add-hora').value) ? $('add-hora').value : '';
+    if (M.ok){
+      // Va directo a tus tareas; la hora (si pusiste) queda para el aviso
+      $('add-in').value = ''; $('add-hora').value = '';
+      const nt = tNew(t, doc.fecha, null);
+      justRef = 'task:' + nt.id;
+      if (hora){ const r = 'task:' + nt.id, v = {hora, en: iso()}; saveTicks(Object.assign({}, doc, {mov: Object.assign({}, doc.mov, {[r]: v})}), d => { d.mov = d.mov && typeof d.mov === 'object' ? d.mov : {}; d.mov[r] = v; }); }
+      msg(hora ? (avOn ? `Agregado. Te aviso a las ${hora}.` : `Agregado para las ${hora}. Activá los avisos arriba para que te llegue al celu.`) : 'Agregado a tus tareas.', 'ok');
+      return;
+    }
     const nueva = {id: rid(), texto: t, en: iso()};
     if (hora) nueva.hora = hora;
     saveTicks(Object.assign({}, doc, {nuevas: doc.nuevas.concat([nueva])}), d => { d.nuevas.push(nueva); });
@@ -1119,7 +1285,7 @@ document.addEventListener('submit', e => {
     const kg = parseFloat(String($('in-kg').value).trim().replace(/\s/g, '').replace(',', '.'));
     if (!(kg >= 40 && kg <= 200)){ msg('Revisá el peso: tiene que estar entre 40 y 200 kg.', 'err'); return; }
     openRef = null; setTick(f.dataset.ref, true, Math.round(kg*10)/10);
-    msg('Peso anotado. Va a Mini Cut y a Routly en la próxima sincronización.', 'ok');
+    msg('Peso anotado. Va a Mini Cut en la próxima sincronización.', 'ok');
     return;
   }
   if (f.dataset.form === 'comida'){
@@ -1153,6 +1319,590 @@ document.addEventListener('submit', e => {
     db.doc('manual/metas').mutate(d => { d = d && typeof d === 'object' ? d : {}; d.valores = d.valores || {}; d.valores[id] = cur; return d; })
       .then(() => msg('Meta actualizada.', 'ok')).catch(() => msg('No se pudo guardar la meta.', 'err'));
   }
+});
+
+/* ---------- Módulos: tareas, plan del día y hábitos (tablas propias del Cerebro) ---------- */
+const M = {ok: false, err: false, tasks: [], projects: [], blocks: [], bd: new Map(), habits: [], hl: new Set()};
+let mChan = null, mChain = Promise.resolve(), mRaf = 0, page = 'inicio';
+const uuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+const isoDow = f => { const d = new Date(f + 'T12:00:00').getDay(); return d === 0 ? 7 : d; };
+const wkStart = f => addDays(f, 1 - isoDow(f));
+const diasMes = f => { const [y, m] = f.split('-').map(Number); return new Date(y, m, 0).getDate(); };
+const mesMas = (f, n) => { const [y, m] = f.split('-').map(Number); const d = new Date(y, m - 1 + n, 1); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-01'; };
+const hhmm = t => String(t || '').slice(0, 5);
+const fLocal = ts => { const d = new Date(ts); return isNaN(d) ? today() : d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+const DIAS1 = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const DIAS3 = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const CK = '<svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+const byOrden = (a, b) => (a.orden ?? 0) - (b.orden ?? 0) || String(a.creado_en || '').localeCompare(String(b.creado_en || ''));
+const tipoDe = s => /estudi|m[ée]todos|repaso|final|esquema|parcial/i.test(s || '') ? 'estudio' : 'tarea';
+
+async function selAll(t, cols, f){
+  let out = [], from = 0;
+  for (;;){
+    let q = sb.from(t).select(cols).order('id').range(from, from + 999);
+    if (f) q = f(q);
+    const {data, error} = await q;
+    if (error) throw error;
+    out = out.concat(data || []);
+    if (!data || data.length < 1000) return out;
+    from += 1000;
+  }
+}
+async function mLoad(){
+  try {
+    const desde = addDays(today(), -800);
+    const [tk, pj, bl, bd, hb, hl] = await Promise.all([
+      selAll('tasks', 'id,titulo,fecha,completada,orden,project_id,minutos_estimados,premio,creado_en', q => q.eq('eliminado', false)),
+      selAll('projects', 'id,nombre,color,orden', q => q.eq('eliminado', false)),
+      selAll('plan_blocks', 'id,fecha,titulo,hora_inicio,hora_fin,completado,dias_semana,creado_en', q => q.eq('eliminado', false)),
+      selAll('plan_block_dias', 'id,plan_block_id,fecha,cancelado,completado', q => q.eq('eliminado', false)),
+      selAll('habits', 'id,nombre,icono,meta_semanal,color,orden,archivado,creado_en', q => q.eq('eliminado', false)),
+      selAll('habit_logs', 'habit_id,fecha', q => q.eq('eliminado', false).eq('completado', true).gte('fecha', desde))
+    ]);
+    M.tasks = tk; M.projects = pj; M.blocks = bl; M.habits = hb;
+    M.bd = new Map(bd.map(r => [r.plan_block_id + '|' + r.fecha, r]));
+    M.hl = new Set(hl.map(r => r.habit_id + '|' + r.fecha));
+    M.ok = true; M.err = false;
+  } catch (e) { console.error(e); M.err = true; }
+  render();
+}
+function mRender(){ if (mRaf) return; mRaf = requestAnimationFrame(() => { mRaf = 0; render(); }); }
+function mListen(){
+  if (mChan) sb.removeChannel(mChan);
+  const up = (arr, r) => { const i = arr.findIndex(x => x.id === r.id); if (r.eliminado){ if (i >= 0) arr.splice(i, 1); } else if (i >= 0) Object.assign(arr[i], r); else arr.push(r); };
+  let ch = sb.channel('cerebro-mod');
+  const on = (t, fn) => { ch = ch.on('postgres_changes', {event: '*', schema: 'public', table: t}, p => { if (p.eventType === 'DELETE' || !p.new) return; fn(p.new); mRender(); }); };
+  on('tasks', r => up(M.tasks, r));
+  on('projects', r => up(M.projects, r));
+  on('plan_blocks', r => up(M.blocks, r));
+  on('habits', r => up(M.habits, r));
+  on('plan_block_dias', r => { const k = r.plan_block_id + '|' + r.fecha; if (r.eliminado) M.bd.delete(k); else M.bd.set(k, r); });
+  on('habit_logs', r => { const k = r.habit_id + '|' + r.fecha; if (r.completado && !r.eliminado) M.hl.add(k); else M.hl.delete(k); });
+  mChan = ch.subscribe();
+}
+function mFail(e){
+  console.error(e);
+  const t = 'No se pudo guardar. Revisá la conexión y probá de nuevo.';
+  msg(t, 'err'); pmsg(t, 'err');
+  mLoad();
+}
+// Las escrituras van en fila: una tarea recién creada existe antes de tacharla.
+function mDo(fn){ mChain = mChain.then(async () => { const {error} = await fn(); if (error) throw error; }).catch(mFail); }
+
+/* Tareas */
+const taskById = id => M.tasks.find(t => t.id === id);
+const projById = id => id ? M.projects.find(p => p.id === id) : null;
+const nextOrden = f => M.tasks.filter(t => t.fecha === f).reduce((m, t) => Math.max(m, t.orden ?? 0), -1) + 1;
+function tSet(id, patch){
+  const t = taskById(id); if (!t) return;
+  Object.assign(t, patch); render();
+  mDo(() => sb.from('tasks').update(patch).eq('id', id));
+}
+function tNew(titulo, fecha, project_id){
+  const t = {id: uuid(), titulo: String(titulo).slice(0, 300), fecha: fecha || null, completada: false, orden: nextOrden(fecha || null), project_id: project_id || null, creado_en: iso()};
+  M.tasks.push(t); render();
+  mDo(() => sb.from('tasks').insert({id: t.id, titulo: t.titulo, fecha: t.fecha, orden: t.orden, project_id: t.project_id}));
+  return t;
+}
+let lastTDel = null, lastBDel = null;
+function tDel(id){
+  const t = taskById(id); if (!t) return;
+  lastTDel = Object.assign({}, t);
+  M.tasks = M.tasks.filter(x => x.id !== id); render();
+  mDo(() => sb.from('tasks').update({eliminado: true}).eq('id', id));
+  pmsg(`Borré "${t.titulo}".`, '', `<button class="undo" type="button" data-tundo>Deshacer</button>`);
+}
+function tUndo(){
+  const t = lastTDel; if (!t) return;
+  lastTDel = null; M.tasks.push(t); render();
+  mDo(() => sb.from('tasks').update({eliminado: false}).eq('id', t.id));
+  pmsg('Volvió.', 'ok');
+}
+// Mueve una tarea a otro día (o la reordena en el mismo) dejándola antes de "antes" o al final.
+function tMover(id, fecha, antes){
+  const t = taskById(id); if (!t) return;
+  fecha = fecha || null;
+  const lista = M.tasks.filter(x => x.fecha === fecha && x.id !== id).sort(byOrden);
+  let i = antes ? lista.findIndex(x => x.id === antes) : -1;
+  if (i < 0) i = lista.length;
+  lista.splice(i, 0, t);
+  const cambios = [];
+  lista.forEach((x, n) => { if (x.id === id){ if (x.fecha !== fecha || x.orden !== n) cambios.push([x.id, {fecha, orden: n}]); } else if (x.orden !== n) cambios.push([x.id, {orden: n}]); });
+  cambios.forEach(([cid, p]) => Object.assign(taskById(cid), p));
+  render();
+  cambios.forEach(([cid, p]) => mDo(() => sb.from('tasks').update(p).eq('id', cid)));
+}
+
+/* Hábitos */
+const hActivos = () => M.habits.filter(h => !h.archivado).sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0) || String(a.nombre).localeCompare(String(b.nombre)));
+const hOn = (id, f) => M.hl.has(id + '|' + f);
+function hSet(id, f, val){
+  const k = id + '|' + f;
+  if (val) M.hl.add(k); else M.hl.delete(k);
+  render();
+  mDo(() => sb.from('habit_logs').upsert({habit_id: id, fecha: f, completado: !!val, eliminado: false}, {onConflict: 'habit_id,fecha'}));
+}
+function hUpd(id, patch){
+  const h = M.habits.find(x => x.id === id); if (!h) return;
+  Object.assign(h, patch); render();
+  mDo(() => sb.from('habits').update(patch).eq('id', id));
+}
+function hNew(nombre, meta){
+  const orden = M.habits.reduce((m, h) => Math.max(m, h.orden ?? 0), 0) + 1;
+  const h = {id: uuid(), nombre: String(nombre).slice(0, 80), meta_semanal: meta, orden, archivado: false, creado_en: iso()};
+  M.habits.push(h); render();
+  mDo(() => sb.from('habits').insert({id: h.id, nombre: h.nombre, meta_semanal: meta, orden}));
+}
+function hFechas(id){
+  const s = new Set(), p = id + '|';
+  M.hl.forEach(k => { if (k.startsWith(p)) s.add(k.slice(p.length)); });
+  return s;
+}
+// Racha actual y récord: un día sin marcar por semana (lunes a domingo) no corta la racha.
+function rachas(set, hoy, desde){
+  const ini = desde <= hoy ? desde : hoy;
+  let rec = 0, cor = 0;
+  const sp = new Set();
+  for (let d = ini; d <= hoy; d = addDays(d, 1)){
+    if (set.has(d)){ cor++; rec = Math.max(rec, cor); continue; }
+    const w = wkStart(d);
+    if (!sp.has(w)){ sp.add(w); continue; }
+    cor = 0;
+  }
+  let act = 0, c = set.has(hoy) ? hoy : addDays(hoy, -1);
+  const su = new Set();
+  while (c >= ini){
+    if (set.has(c)){ act++; c = addDays(c, -1); continue; }
+    const w = wkStart(c);
+    if (!su.has(w)){ su.add(w); c = addDays(c, -1); continue; }
+    break;
+  }
+  return {act, rec};
+}
+const metaMes = (metaSem, dias) => Math.round(metaSem / 7 * dias);
+const pctMeta = (c, meta) => meta > 0 ? Math.min(100, Math.round(c / meta * 100)) : 0;
+
+/* Plan del día: bloques con hora, algunos se repiten ciertos días de la semana */
+const seRepite = b => Array.isArray(b.dias_semana) && b.dias_semana.length > 0;
+const caeEn = (b, f) => seRepite(b) ? (f >= b.fecha && b.dias_semana.map(Number).includes(isoDow(f))) : b.fecha === f;
+const minDe = t => { const [h, m] = hhmm(t).split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+function ocurrencias(f){
+  return M.blocks.filter(b => caeEn(b, f)).map(b => {
+    const dv = M.bd.get(b.id + '|' + f), rec = seRepite(b);
+    return {b, f, rec, cancel: !!(dv && dv.cancelado), done: rec ? !!(dv && dv.completado) : !!b.completado};
+  }).filter(o => !o.cancel).sort((a, b) => minDe(a.b.hora_inicio) - minDe(b.b.hora_inicio));
+}
+function bDia(id, f, patch){
+  const k = id + '|' + f, cur = M.bd.get(k) || {plan_block_id: id, fecha: f, cancelado: false, completado: false};
+  const n = Object.assign({}, cur, patch);
+  M.bd.set(k, n); render();
+  mDo(() => sb.from('plan_block_dias').upsert({plan_block_id: id, fecha: f, cancelado: !!n.cancelado, completado: !!n.completado, eliminado: false}, {onConflict: 'plan_block_id,fecha'}));
+}
+function bToggle(id, f){
+  const b = M.blocks.find(x => x.id === id); if (!b) return;
+  if (seRepite(b)){ const dv = M.bd.get(id + '|' + f); bDia(id, f, {completado: !(dv && dv.completado)}); return; }
+  b.completado = !b.completado; render();
+  mDo(() => sb.from('plan_blocks').update({completado: b.completado}).eq('id', id));
+}
+function bBorrar(id){
+  const b = M.blocks.find(x => x.id === id); if (!b) return;
+  lastBDel = Object.assign({}, b);
+  M.blocks = M.blocks.filter(x => x.id !== id); render();
+  mDo(() => sb.from('plan_blocks').update({eliminado: true}).eq('id', id));
+  pmsg(`Borré "${b.titulo}"${seRepite(b) ? ' de todos los días' : ''}.`, '', `<button class="undo" type="button" data-bundo>Deshacer</button>`);
+}
+function bUndo(){
+  const b = lastBDel; if (!b) return;
+  lastBDel = null; M.blocks.push(b); render();
+  mDo(() => sb.from('plan_blocks').update({eliminado: false}).eq('id', b.id));
+  pmsg('Volvió.', 'ok');
+}
+
+/* ---------- Conexión con la lista de Hoy ---------- */
+// Estado de una tarea o hábito de la lista según sus tablas (null si no es de acá o todavía no cargó).
+function mDone(ref, f){
+  if (!M.ok) return null;
+  const [k, id] = String(ref).split(/:(.*)/s);
+  if (k === 'task'){ const t = taskById(id); return t ? !!t.completada : null; }
+  if (k === 'habit') return M.habits.some(h => h.id === id) ? hOn(id, f || listDate()) : null;
+  return null;
+}
+function mMark(ref, hecho, f){
+  if (!M.ok) return;
+  const [k, id] = String(ref).split(/:(.*)/s);
+  if (k === 'task'){ const t = taskById(id); if (t && !!t.completada !== !!hecho) tSet(id, {completada: !!hecho}); }
+  else if (k === 'habit' && M.habits.some(h => h.id === id) && hOn(id, f) !== !!hecho) hSet(id, f, !!hecho);
+}
+// Las tareas de un día para el borrador de mañana (antes salían de Routly vía cerebro/agenda)
+function agendaDia(f){
+  if (M.ok) return M.tasks.filter(t => t.fecha === f).sort(byOrden).map(t => ({ref: 'task:' + t.id, titulo: t.titulo, hecha: !!t.completada}));
+  return (agendaRaw && agendaRaw.dias && agendaRaw.dias[f]) || [];
+}
+
+/* ---------- Páginas ---------- */
+const PAGES = {inicio: 'pg-inicio', tareas: 'pg-tareas', habitos: 'pg-habitos'};
+function setPage(p, push){
+  if (!PAGES[p]) p = 'inicio';
+  page = p;
+  Object.keys(PAGES).forEach(k => { $(PAGES[k]).hidden = k !== p; });
+  if (push !== false){
+    const h = p === 'inicio' ? '' : '#' + p;
+    if (location.hash !== h) history.pushState(null, '', h || (location.pathname + location.search));
+  }
+  window.scrollTo(0, 0);
+  render(); navActive();
+}
+window.addEventListener('popstate', () => setPage(location.hash.slice(1) || 'inicio', false));
+function pmsg(t, cls, extra){
+  const m = $(page === 'habitos' ? 'h-msg' : 't-msg'); if (!m) return;
+  m.className = 'msg' + (cls ? ' ' + cls : '');
+  m.innerHTML = esc(t || '') + (extra || '');
+}
+// Re-render sin perder lo que estás escribiendo
+function keepTyping(box, fn){
+  const vals = {};
+  box.querySelectorAll('input[id],select[id]').forEach(i => { vals[i.id] = i.type === 'checkbox' ? i.checked : i.value; });
+  const a = document.activeElement, fid = a && box.contains(a) && a.id ? a.id : null;
+  let ss = null; try { ss = fid ? a.selectionStart : null; } catch (e) {}
+  fn();
+  Object.keys(vals).forEach(id => { const i = $(id); if (i){ if (i.type === 'checkbox') i.checked = vals[id]; else i.value = vals[id]; } });
+  if (fid && $(fid)){ $(fid).focus(); try { if (ss != null) $(fid).setSelectionRange(ss, ss); } catch (e) {} }
+}
+const segHtml = (attr, cur, ops) => ops.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${v === cur}">${l}</button>`).join('');
+const projOpts = sel => `<option value="">Sin proyecto</option>` + M.projects.slice().sort(byOrden).map(p => `<option value="${esc(p.id)}"${p.id === sel ? ' selected' : ''}>${esc(p.nombre)}</option>`).join('');
+
+/* ---------- Página Tareas: día, semana y mes ---------- */
+let tv = 'dia', tref = today(), tproj = '', tEdit = null, bForm = null, bAsk = null, dragId = null;
+function tLabel(){
+  if (tv === 'dia') return fmtD(tref, {weekday: 'long', day: 'numeric', month: 'long'});
+  if (tv === 'semana'){ const s = wkStart(tref); return `${fmtD(s)} – ${fmtD(addDays(s, 6))}`; }
+  return fmtD(tref.slice(0, 8) + '01', {month: 'long', year: 'numeric'});
+}
+const tasksOn = f => M.tasks.filter(t => (t.fecha || null) === f && (!tproj || t.project_id === tproj)).sort(byOrden);
+function tItem(t, sm){
+  const p = projById(t.project_id), ed = tEdit === t.id;
+  const sub = [p ? esc(p.nombre) : '', t.minutos_estimados ? `${t.minutos_estimados} min` : '', t.premio ? 'Premio: ' + esc(t.premio) : ''].filter(Boolean).join(' · ');
+  const form = ed ? `<form class="inl mvf" data-mform="tedit" data-id="${esc(t.id)}"><input id="te-t-${esc(t.id)}" type="text" maxlength="300" value="${esc(t.titulo)}" aria-label="Nombre de la tarea"><label class="mvl">Día<input id="te-f-${esc(t.id)}" type="date" value="${esc(t.fecha || '')}"></label><select id="te-p-${esc(t.id)}" aria-label="Proyecto">${projOpts(t.project_id)}</select><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-tcancel>Cancelar</button><button class="btn ghost" type="button" data-tdel="${esc(t.id)}">Borrar</button></form>` : '';
+  return `<li class="it${t.completada ? ' done' : ''}${justRef === 'task:' + t.id ? ' just' : ''}" draggable="${ed ? 'false' : 'true'}" data-tid="${esc(t.id)}"><button class="ck" type="button" data-tk="${esc(t.id)}" aria-pressed="${!!t.completada}" aria-label="${t.completada ? 'Desmarcar' : 'Marcar'}: ${esc(t.titulo)}">${CK}</button><div><button class="t" type="button" data-tedit="${esc(t.id)}" title="Editar">${esc(t.titulo)}</button>${sub && !sm ? `<span class="sub">${sub}</span>` : ''}${form}</div>${sm ? '<span></span>' : `<button class="x" type="button" data-tdel="${esc(t.id)}" aria-label="Borrar: ${esc(t.titulo)}" title="Borrar">×</button>`}</li>`;
+}
+function bloqueForm(o, f){
+  const b = o ? o.b : null, ds = new Set(b && b.dias_semana ? b.dias_semana.map(Number) : []);
+  const pre = b ? 'be-' + b.id : 'pb';
+  return `<form class="bform" data-mform="${b ? 'bedit' : 'badd'}" data-f="${esc(f)}"${b ? ` data-id="${esc(b.id)}"` : ''}>
+    <input id="${pre}-t" type="text" maxlength="120" placeholder="Qué vas a hacer (ej: Estudiar Métodos)" value="${b ? esc(b.titulo) : ''}" aria-label="Qué vas a hacer">
+    <div class="brow"><label class="mvl">Desde<input id="${pre}-i" type="time" value="${b ? hhmm(b.hora_inicio) : ''}" required></label><label class="mvl">Hasta<input id="${pre}-h" type="time" value="${b ? hhmm(b.hora_fin) : ''}" required></label></div>
+    <div class="brow"><span class="lbl">Repetir</span><div class="dsel">${DIAS1.map((d, i) => `<label><input id="${pre}-d${i + 1}" type="checkbox" value="${i + 1}"${ds.has(i + 1) ? ' checked' : ''}><span title="${DIAS3[i]}">${d}</span></label>`).join('')}</div></div>
+    <div class="brow"><button class="btn" type="submit">${b ? 'Guardar' : 'Agregar al plan'}</button><button class="btn ghost" type="button" data-bcancel>Cancelar</button>${b ? `<button class="btn ghost" type="button" data-bdel="${esc(b.id)}" data-f="${esc(f)}">Borrar</button>` : ''}</div>
+  </form>`;
+}
+function planHtml(f){
+  const os = ocurrencias(f), esHoy = f === today();
+  const ahora = new Date(), nowM = ahora.getHours() * 60 + ahora.getMinutes();
+  const items = os.map(o => {
+    const b = o.b, ini = minDe(b.hora_inicio), fin = minDe(b.hora_fin), now = esHoy && nowM >= ini && nowM < fin;
+    if (bForm && bForm.id === b.id && bForm.f === f) return `<li class="it pb">${bloqueForm(o, f)}</li>`;
+    const ask = bAsk && bAsk.id === b.id && bAsk.f === f
+      ? `<div class="inl"><span class="sub">¿Lo saco solo este día o de todos los días?</span><button class="btn sm" type="button" data-bsolo="${esc(b.id)}" data-f="${esc(f)}">Solo este día</button><button class="btn ghost sm" type="button" data-btodos="${esc(b.id)}">Todos los días</button><button class="btn ghost sm" type="button" data-bno>Cancelar</button></div>` : '';
+    const rep = o.rec ? `<span class="sub">Se repite: ${b.dias_semana.map(Number).sort().map(n => DIAS3[n - 1]).join(', ')}</span>` : '';
+    return `<li class="it pb${o.done ? ' done' : ''}${now ? ' now' : ''}"><button class="ck" type="button" data-bk="${esc(b.id)}" data-f="${esc(f)}" aria-pressed="${o.done}" aria-label="${o.done ? 'Desmarcar' : 'Marcar'}: ${esc(b.titulo)}">${CK}</button><div><span class="hr num">${hhmm(b.hora_inicio)} – ${hhmm(b.hora_fin)}${now ? ' · ahora' : ''}</span><button class="t" type="button" data-bedit="${esc(b.id)}" data-f="${esc(f)}" title="Editar">${esc(b.titulo)}</button>${rep}${ask}</div><button class="x" type="button" data-bdel="${esc(b.id)}" data-f="${esc(f)}" aria-label="Sacar del plan: ${esc(b.titulo)}" title="Sacar del plan">×</button></li>`;
+  }).join('');
+  const add = bForm && bForm.nuevo && bForm.f === f ? bloqueForm(null, f) : `<button class="btn soft" type="button" data-badd="${esc(f)}">Agregar bloque al plan</button>`;
+  const hechos = os.filter(o => o.done).length;
+  return `<section class="panel"><div class="ph"><h2>Plan del día</h2><span class="lbl num">${os.length ? `${hechos}/${os.length}` : ''}</span></div>${os.length ? `<ul class="list">${items}</ul>` : '<p class="empty">Nada con horario este día. Armá tu plan por bloques.</p>'}${add}</section>`;
+}
+function addTaskForm(f, id, ph){
+  return `<form class="add" data-mform="tadd" data-f="${esc(f || '')}" autocomplete="off"><input id="${id}" type="text" maxlength="300" placeholder="${esc(ph)}" aria-label="${esc(ph)}"><select id="${id}-p" aria-label="Proyecto">${projOpts(tproj)}</select><button class="btn soft" type="submit">Agregar</button></form>`;
+}
+function sinFechaHtml(){
+  const ts = tasksOn(null);
+  if (!ts.length) return '';
+  return `<section class="panel" data-dropday=""><div class="ph"><h2>Sin fecha</h2><span class="lbl num">${ts.filter(t => !t.completada).length} pendientes</span></div><ul class="list">${ts.map(t => tItem(t)).join('')}</ul></section>`;
+}
+function tDiaHtml(){
+  const f = tref, ts = tasksOn(f), dn = ts.filter(t => t.completada).length;
+  return `<div class="tcols">
+    <section class="panel" data-dropday="${esc(f)}"><div class="ph"><h2>Tareas</h2><span class="lbl num">${ts.length ? `${dn}/${ts.length}` : ''}</span></div>
+      ${ts.length ? `<ul class="list">${ts.map(t => tItem(t)).join('')}</ul>` : '<p class="empty">Sin tareas para este día.</p>'}
+      ${addTaskForm(f, 'ta-in', 'Nueva tarea para este día')}
+    </section>
+    ${planHtml(f)}
+  </div>${sinFechaHtml()}`;
+}
+function tSemanaHtml(){
+  const s = wkStart(tref), hoy = today();
+  const cols = Array.from({length: 7}, (_, i) => {
+    const f = addDays(s, i), ts = tasksOn(f), dn = ts.filter(t => t.completada).length;
+    return `<div class="wd${f === hoy ? ' hoy' : ''}" data-dropday="${esc(f)}"><button class="wdh" type="button" data-tgo="${esc(f)}" title="Ver el día"><b>${DIAS3[i]}</b><span class="num">${+f.slice(8)}</span><em class="num">${ts.length ? `${dn}/${ts.length}` : ''}</em></button>${ts.length ? `<ul class="list sm">${ts.map(t => tItem(t, true)).join('')}</ul>` : ''}<form class="wadd" data-mform="tadd" data-f="${esc(f)}" autocomplete="off"><input id="wa-${esc(f)}" type="text" maxlength="300" placeholder="+ Agregar" aria-label="Agregar tarea el ${esc(fmtD(f, {weekday: 'long', day: 'numeric'}))}"></form></div>`;
+  }).join('');
+  return `<div class="wk">${cols}</div>${sinFechaHtml()}<p class="vnota">Arrastrá una tarea a otro día para moverla. En el celu, tocala y cambiale el día.</p>`;
+}
+function tMesHtml(){
+  const m0 = tref.slice(0, 8) + '01', n = diasMes(m0), ini = wkStart(m0), fin = addDays(m0, n - 1), fin2 = addDays(fin, 7 - isoDow(fin)), hoy = today();
+  let cells = DIAS3.map(d => `<span class="dw">${d}</span>`).join('');
+  for (let f = ini; f <= fin2; f = addDays(f, 1)){
+    const ts = tasksOn(f), out = f.slice(0, 7) !== m0.slice(0, 7), pend = ts.filter(t => !t.completada).length;
+    const tit = ts.slice(0, 3).map(t => `<span class="mct${t.completada ? ' done' : ''}">${esc(t.titulo)}</span>`).join('');
+    cells += `<button class="mc${out ? ' out' : ''}${f === hoy ? ' hoy' : ''}" type="button" data-tgo="${esc(f)}" data-dropday="${esc(f)}" aria-label="${esc(fmtD(f, {weekday: 'long', day: 'numeric', month: 'long'}))}: ${ts.length} tareas"><span class="mcd num">${+f.slice(8)}</span>${tit}${ts.length > 3 ? `<span class="mcm">+${ts.length - 3} más</span>` : ''}${ts.length ? `<span class="mcn num${pend ? '' : ' ok'}">${ts.length}</span>` : ''}</button>`;
+  }
+  const delMes = M.tasks.filter(t => t.fecha && t.fecha.slice(0, 7) === m0.slice(0, 7) && (!tproj || t.project_id === tproj));
+  const hechas = delMes.filter(t => t.completada).length;
+  return `<section class="panel"><div class="ph"><h2>${esc(fmtD(m0, {month: 'long'}))}</h2><span class="lbl num">${delMes.length ? `${hechas} de ${delMes.length} hechas` : ''}</span></div><div class="mcal">${cells}</div></section>`;
+}
+function renderTareas(){
+  const box = $('tareas');
+  $('t-seg').innerHTML = segHtml('data-tv', tv, [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes']]);
+  $('t-lbl').textContent = tLabel();
+  if (!M.ok){ box.innerHTML = `<p class="empty">${M.err ? 'No pude traer tus tareas. Revisá la conexión.' : 'Cargando tus tareas…'}</p>`; $('t-proj').innerHTML = ''; return; }
+  $('t-proj').innerHTML = M.projects.length ? segHtml('data-tproj', tproj, [['', 'Todos']].concat(M.projects.slice().sort(byOrden).map(p => [p.id, esc(p.nombre)]))) : '';
+  keepTyping(box, () => { box.innerHTML = tv === 'dia' ? tDiaHtml() : tv === 'semana' ? tSemanaHtml() : tMesHtml(); });
+  justRef = null;
+}
+
+/* ---------- Página Hábitos: día, semana, mes y año ---------- */
+let hv = 'semana', href = today(), hEditOpen = false;
+function hLabel(){
+  if (hv === 'dia') return fmtD(href, {weekday: 'long', day: 'numeric', month: 'long'});
+  if (hv === 'semana'){ const s = wkStart(href); return `${fmtD(s)} – ${fmtD(addDays(s, 6))}`; }
+  if (hv === 'mes') return fmtD(href.slice(0, 8) + '01', {month: 'long', year: 'numeric'});
+  return href.slice(0, 4);
+}
+function hNextOff(){
+  const hoy = today();
+  if (hv === 'dia') return href >= hoy;
+  if (hv === 'semana') return addDays(wkStart(href), 6) >= hoy;
+  if (hv === 'mes') return href.slice(0, 7) >= hoy.slice(0, 7);
+  return href.slice(0, 4) >= hoy.slice(0, 4);
+}
+function hStats(h){
+  const set = hFechas(h.id), hoy = today();
+  const r = rachas(set, hoy, fLocal(h.creado_en));
+  const s = wkStart(hoy); let sem = 0;
+  for (let i = 0; i < 7; i++) if (set.has(addDays(s, i))) sem++;
+  return {set, act: r.act, rec: r.rec, sem};
+}
+const hName = h => `${h.icono ? `<span class="hico" aria-hidden="true">${esc(h.icono)}</span>` : ''}${esc(h.nombre)}`;
+function hCell(h, f, hoy, cls){
+  const on = hOn(h.id, f), fut = f > hoy;
+  return `<button class="hc${cls ? ' ' + cls : ''}${on ? ' on' : ''}" type="button" data-hk="${esc(h.id)}" data-f="${esc(f)}" aria-pressed="${on}" aria-label="${esc(h.nombre)}, ${esc(fmtD(f, {weekday: 'long', day: 'numeric'}))}"${fut ? ' disabled' : ''}>${CK}</button>`;
+}
+function hDiaHtml(hs){
+  const f = href, dn = hs.filter(h => hOn(h.id, f)).length;
+  return `<section class="panel"><div class="ph"><h2>${f === today() ? 'Hoy' : esc(fmtD(f, {weekday: 'long', day: 'numeric'}))}</h2><span class="lbl num">${dn}/${hs.length}</span></div><ul class="list">${hs.map(h => {
+    const on = hOn(h.id, f), st = hStats(h);
+    return `<li class="it${on ? ' done' : ''}"><button class="ck" type="button" data-hk="${esc(h.id)}" data-f="${esc(f)}" aria-pressed="${on}" aria-label="${on ? 'Desmarcar' : 'Marcar'}: ${esc(h.nombre)}">${CK}</button><div><button class="t" type="button" data-hk="${esc(h.id)}" data-f="${esc(f)}">${hName(h)}</button><span class="sub">Racha ${st.act} ${st.act === 1 ? 'día' : 'días'} · récord ${st.rec} · esta semana ${st.sem}/${h.meta_semanal}</span></div><span></span></li>`;
+  }).join('')}</ul></section>`;
+}
+function hSemanaHtml(hs){
+  const s = wkStart(href), hoy = today(), fs = Array.from({length: 7}, (_, i) => addDays(s, i));
+  const esp = Math.max(0, Math.min(1, (dayN(hoy) - dayN(s) + 1) / 7));
+  const rows = hs.map(h => {
+    const c = fs.filter(f => hOn(h.id, f)).length, meta = +h.meta_semanal || 7, p = Math.min(1, c / meta);
+    const tone = c >= meta ? 'good' : (s > hoy ? '' : paceTone(p, esp));
+    const st = hStats(h);
+    return `<tr><td class="hn"><span class="hnm">${hName(h)}</span><span class="sub"><span class="hsm">${c}/${meta} · </span>Racha ${st.act} · récord ${st.rec}</span></td>${fs.map(f => `<td>${hCell(h, f, hoy)}</td>`).join('')}<td class="hs"><b class="num ${tone}">${c}/${meta}</b><div class="bar ${tone}"><i style="width:${Math.round(p * 100)}%"></i></div></td></tr>`;
+  }).join('');
+  const tot = fs.filter(f => f <= hoy).map(f => hs.filter(h => hOn(h.id, f)).length);
+  return `<section class="panel"><div class="hgrid sem"><table><thead><tr><th class="hn">Hábito</th>${fs.map((f, i) => `<th class="${f === hoy ? 'hoy' : ''}">${DIAS3[i]}<br><span class="num">${+f.slice(8)}</span></th>`).join('')}<th class="hs">Semana</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td class="hn"><span class="sub">Hechos por día</span></td>${fs.map((f, i) => `<td><span class="num sub">${i < tot.length ? `${tot[i]}/${hs.length}` : ''}</span></td>`).join('')}<td></td></tr></tfoot></table></div></section>`;
+}
+function areaSvg(vals, n){
+  const W = 600, H = 120, pad2 = 6;
+  if (!vals.length) return '';
+  const x = i => pad2 + (W - 2 * pad2) * (n > 1 ? i / (n - 1) : 0), y = v => H - pad2 - (H - 2 * pad2) * v / 100;
+  const pts = vals.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Porcentaje de hábitos hechos por día"><line x1="${pad2}" x2="${W - pad2}" y1="${y(100)}" y2="${y(100)}" stroke="var(--line)" stroke-dasharray="3 4"/><polygon points="${x(0).toFixed(1)},${H - pad2} ${pts} ${x(vals.length - 1).toFixed(1)},${H - pad2}" fill="var(--accent-dim)"/><polyline points="${pts}" fill="none" stroke="var(--fg)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+function hMesHtml(hs){
+  const m0 = href.slice(0, 8) + '01', n = diasMes(m0), hoy = today(), fs = Array.from({length: n}, (_, i) => addDays(m0, i));
+  const hasta = fs.filter(f => f <= hoy);
+  const stats = hs.map(h => { const c = fs.filter(f => hOn(h.id, f)).length, meta = metaMes(+h.meta_semanal || 7, n), st = hStats(h); return {h, c, meta, st}; });
+  const totMeta = stats.reduce((a, s) => a + s.meta, 0), totC = stats.reduce((a, s) => a + Math.min(s.c, s.meta), 0), pct = pctMeta(totC, totMeta);
+  const daily = hasta.map(f => hs.length ? Math.round(hs.filter(h => hOn(h.id, f)).length / hs.length * 100) : 0);
+  const espM = hoy.slice(0, 7) === m0.slice(0, 7) ? hasta.length / n : (m0 > hoy ? 0 : 1);
+  const tone = paceTone(pct / 100, espM);
+  const rows = stats.map(({h, c, meta, st}) => `<tr><td class="hn"><span class="hnm">${hName(h)}</span></td>${fs.map(f => `<td>${hCell(h, f, hoy, 'sm')}</td>`).join('')}<td class="hs"><b class="num">${c}/${meta}</b><span class="sub">${pctMeta(c, meta)}% · racha ${st.act}</span></td></tr>`).join('');
+  return `<div class="tcols">
+    <section class="panel"><div class="ph"><h2>Progreso del mes</h2><span class="lbl num">${hasta.length ? `Día ${hasta.length} de ${n}` : ''}</span></div>
+      <div class="kpis"><div class="kpi"><b class="num ${tone}">${pct}%</b><span>de tu meta del mes</span></div><div class="kpi"><b class="num">${totC}<small> / ${totMeta}</small></b><span>hechos · faltan ${Math.max(0, totMeta - totC)}</span></div></div>
+      <div class="mchart">${areaSvg(daily, n)}</div>
+    </section>
+    <section class="panel"><div class="ph"><h2>Por hábito</h2><span class="lbl">Meta del mes</span></div><div class="habs">${stats.map(({h, c, meta}) => { const p = pctMeta(c, meta), t = c >= meta ? 'good' : paceTone(p / 100, espM); return `<div class="hab${c >= meta ? ' ok' : ''}"><span>${hName(h)}</span><span class="n num ${c >= meta ? '' : t}">${p}%</span><div class="bar ${t}"><i style="width:${Math.max(p, t === 'bad' ? 3 : 0)}%"></i></div></div>`; }).join('')}</div></section>
+  </div>
+  <section class="panel"><div class="hgrid mes"><table><thead><tr><th class="hn">Hábito</th>${fs.map(f => `<th class="${f === hoy ? 'hoy' : ''}"><span class="num">${+f.slice(8)}</span></th>`).join('')}<th class="hs">Mes</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+}
+function hAnioHtml(hs){
+  const y = href.slice(0, 4), hoy = today();
+  const meses = Array.from({length: 12}, (_, i) => {
+    const m0 = `${y}-${pad(i + 1)}-01`;
+    if (m0.slice(0, 7) > hoy.slice(0, 7) || !hs.length) return {m0, p: null};
+    const n = diasMes(m0), meta = hs.reduce((a, h) => a + metaMes(+h.meta_semanal || 7, n), 0);
+    const pre = m0.slice(0, 7), ids = new Set(hs.map(h => h.id));
+    let c = 0; M.hl.forEach(k => { const [hid, f] = k.split('|'); if (ids.has(hid) && f.startsWith(pre)) c++; });
+    return {m0, p: pctMeta(c, meta)};
+  });
+  return `<section class="panel"><div class="ph"><h2>Porcentaje por mes</h2><span class="lbl">Contra tu meta</span></div><div class="habs">${meses.map(({m0, p}) => `<div class="hab"><span>${esc(fmtD(m0, {month: 'long'}))}</span><span class="n num">${p == null ? '—' : p + '%'}</span><div class="bar ${p == null ? '' : p >= 80 ? 'good' : p >= 50 ? 'warn' : 'bad'}"><i style="width:${p || 0}%"></i></div></div>`).join('')}</div></section>`;
+}
+function hEditHtml(){
+  const act = hActivos(), arch = M.habits.filter(h => h.archivado).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre)));
+  const metaSel = (id, v) => `<select id="${id}" ${id === 'hm-new' ? '' : `data-hmeta="${esc(id.slice(3))}"`} aria-label="Veces por semana">${[1, 2, 3, 4, 5, 6, 7].map(n => `<option value="${n}"${n === +v ? ' selected' : ''}>${n === 7 ? 'Todos los días' : n + ' por semana'}</option>`).join('')}</select>`;
+  return `<section class="panel" id="h-edit"><div class="ph"><h2>Editar hábitos</h2><button class="linkb" type="button" data-hedit>Listo</button></div>
+    <div class="hed">${act.map(h => `<div class="hrow"><input id="hn-${esc(h.id)}" type="text" maxlength="80" value="${esc(h.nombre)}" data-hname="${esc(h.id)}" aria-label="Nombre del hábito">${metaSel('hm-' + h.id, h.meta_semanal)}<button class="btn ghost sm" type="button" data-harch="${esc(h.id)}">Archivar</button></div>`).join('')}</div>
+    <form class="add" data-mform="hnew" autocomplete="off"><input id="hn-new" type="text" maxlength="80" placeholder="Nuevo hábito (ej: Leer 20 min)" aria-label="Nuevo hábito">${metaSel('hm-new', 7)}<button class="btn soft" type="submit">Agregar</button></form>
+    ${arch.length ? `<div class="sec"><p class="lbl">Archivados</p>${arch.map(h => `<div class="row nock"><div class="nm"><b>${esc(h.nombre)}</b></div><button class="linkb" type="button" data-hrest="${esc(h.id)}">Volver a usar</button></div>`).join('')}</div>` : ''}
+  </section>`;
+}
+function renderHabitos(){
+  const box = $('habitos');
+  $('h-seg').innerHTML = segHtml('data-hv', hv, [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['anio', 'Año']]);
+  $('h-lbl').textContent = hLabel();
+  $('h-next').disabled = hNextOff();
+  if (!M.ok){ box.innerHTML = `<p class="empty">${M.err ? 'No pude traer tus hábitos. Revisá la conexión.' : 'Cargando tus hábitos…'}</p>`; return; }
+  const hs = hActivos();
+  keepTyping(box, () => {
+    const vista = !hs.length ? '<p class="empty">Todavía no tenés hábitos. Tocá "Editar hábitos" para sumar el primero.</p>'
+      : hv === 'dia' ? hDiaHtml(hs) : hv === 'semana' ? hSemanaHtml(hs) : hv === 'mes' ? hMesHtml(hs) : hAnioHtml(hs);
+    box.innerHTML = (hEditOpen ? hEditHtml() : '') + vista;
+  });
+}
+
+/* ---------- Eventos de los módulos ---------- */
+document.addEventListener('click', e => {
+  const pg = e.target.closest('[data-page]');
+  if (pg){ setPage(pg.dataset.page); return; }
+  if (page === 'inicio') return;
+  const q = s => e.target.closest(s);
+  let b;
+  // Tareas
+  if ((b = q('[data-tv]'))){ tv = b.dataset.tv; tEdit = null; bForm = null; render(); return; }
+  if ((b = q('[data-tnav]'))){
+    const n = +b.dataset.tnav;
+    tref = n === 0 ? today() : tv === 'dia' ? addDays(tref, n) : tv === 'semana' ? addDays(tref, 7 * n) : mesMas(tref, n);
+    tEdit = null; bForm = null; bAsk = null; render(); return;
+  }
+  if ((b = q('[data-tproj]'))){ tproj = b.dataset.tproj; render(); return; }
+  if ((b = q('[data-tgo]'))){ tref = b.dataset.tgo; tv = 'dia'; tEdit = null; render(); window.scrollTo({top: 0, behavior: 'smooth'}); return; }
+  if ((b = q('[data-tk]'))){ const t = taskById(b.dataset.tk); if (t){ const v = !t.completada; justRef = v ? 'task:' + t.id : null; tSet(t.id, {completada: v}); } return; }
+  if (q('[data-tcancel]')){ tEdit = null; render(); return; }
+  if ((b = q('[data-tdel]'))){ tEdit = null; tDel(b.dataset.tdel); return; }
+  if (q('[data-tundo]')){ tUndo(); return; }
+  if ((b = q('[data-tedit]'))){ tEdit = tEdit === b.dataset.tedit ? null : b.dataset.tedit; render(); setTimeout(() => { const i = $('te-t-' + tEdit); if (i) i.focus(); }, 30); return; }
+  if ((b = q('[data-badd]'))){ bForm = {nuevo: true, f: b.dataset.badd}; bAsk = null; render(); setTimeout(() => { const i = $('pb-t'); if (i) i.focus(); }, 30); return; }
+  if ((b = q('[data-bedit]'))){ bForm = {id: b.dataset.bedit, f: b.dataset.f}; bAsk = null; render(); setTimeout(() => { const i = $('be-' + bForm.id + '-t'); if (i) i.focus(); }, 30); return; }
+  if (q('[data-bcancel]')){ bForm = null; render(); return; }
+  if ((b = q('[data-bk]'))){ bToggle(b.dataset.bk, b.dataset.f); return; }
+  if ((b = q('[data-bdel]'))){
+    const bl = M.blocks.find(x => x.id === b.dataset.bdel); if (!bl) return;
+    bForm = null;
+    if (seRepite(bl)){ bAsk = {id: bl.id, f: b.dataset.f}; render(); } else bBorrar(bl.id);
+    return;
+  }
+  if ((b = q('[data-bsolo]'))){ bAsk = null; bDia(b.dataset.bsolo, b.dataset.f, {cancelado: true}); pmsg('Lo saqué de este día. Los demás días sigue.', 'ok'); return; }
+  if ((b = q('[data-btodos]'))){ bAsk = null; bBorrar(b.dataset.btodos); return; }
+  if (q('[data-bno]')){ bAsk = null; render(); return; }
+  if (q('[data-bundo]')){ bUndo(); return; }
+  // Hábitos
+  if ((b = q('[data-hv]'))){ hv = b.dataset.hv; if (href > today()) href = today(); render(); return; }
+  if ((b = q('[data-hnav]'))){
+    const n = +b.dataset.hnav;
+    if (n === 0) href = today();
+    else { href = hv === 'dia' ? addDays(href, n) : hv === 'semana' ? addDays(href, 7 * n) : hv === 'mes' ? mesMas(href, n) : `${+href.slice(0, 4) + n}-01-01`; if (href > today()) href = today(); }
+    render(); return;
+  }
+  if ((b = q('[data-hk]'))){ if (b.disabled) return; const id = b.dataset.hk, f = b.dataset.f; if (f > today()) return; hSet(id, f, !hOn(id, f)); return; }
+  if (q('[data-hedit]')){ hEditOpen = !hEditOpen; render(); if (hEditOpen) setTimeout(() => { const el = $('h-edit'); if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'}); }, 30); return; }
+  if ((b = q('[data-harch]'))){ hUpd(b.dataset.harch, {archivado: true}); pmsg('Archivado. Sus días marcados quedan guardados.', 'ok'); return; }
+  if ((b = q('[data-hrest]'))){ hUpd(b.dataset.hrest, {archivado: false}); pmsg('Vuelve a estar en tus hábitos.', 'ok'); return; }
+});
+document.addEventListener('change', e => {
+  const n = e.target.closest('[data-hname]');
+  if (n){ const v = n.value.trim(); if (v) hUpd(n.dataset.hname, {nombre: v.slice(0, 80)}); return; }
+  const m = e.target.closest('[data-hmeta]');
+  if (m) hUpd(m.dataset.hmeta, {meta_semanal: +m.value});
+});
+document.addEventListener('submit', e => {
+  const f = e.target, k = f.dataset.mform;
+  if (!k) return;
+  e.preventDefault();
+  if (!M.ok){ pmsg('Todavía no cargó. Probá en un segundo.', 'err'); return; }
+  if (k === 'tadd'){
+    const inp = f.querySelector('input[type=text]'), sel = f.querySelector('select');
+    const t = inp.value.trim(); if (!t) return;
+    inp.value = '';
+    const nt = tNew(t, f.dataset.f || null, sel ? sel.value : tproj);
+    justRef = 'task:' + nt.id;
+    pmsg(f.dataset.f ? `Agregada al ${fmtD(f.dataset.f, {weekday: 'long', day: 'numeric'})}.` : 'Agregada sin fecha.', 'ok');
+    inp.focus();
+    return;
+  }
+  if (k === 'tedit'){
+    const t = taskById(f.dataset.id); if (!t) return;
+    const titulo = $('te-t-' + t.id).value.trim(), fecha = $('te-f-' + t.id).value || null, pj = $('te-p-' + t.id).value || null;
+    if (!titulo){ pmsg('Ponele un nombre.', 'err'); return; }
+    tEdit = null;
+    const antes0 = t.fecha || null;
+    if (fecha !== antes0) tMover(t.id, fecha, null);
+    const patch = {};
+    if (titulo !== t.titulo) patch.titulo = titulo.slice(0, 300);
+    if (pj !== (t.project_id || null)) patch.project_id = pj;
+    const movida = fecha !== antes0;
+    if (Object.keys(patch).length) tSet(t.id, patch); else render();
+    pmsg(movida ? (fecha ? `Guardada. La pasé al ${fmtD(fecha, {weekday: 'long', day: 'numeric'})}.` : 'Guardada sin fecha.') : 'Guardada.', 'ok');
+    return;
+  }
+  if (k === 'badd' || k === 'bedit'){
+    const pre = k === 'badd' ? 'pb' : 'be-' + f.dataset.id;
+    const titulo = $(pre + '-t').value.trim(), ini = $(pre + '-i').value, fin = $(pre + '-h').value;
+    const dias = [1, 2, 3, 4, 5, 6, 7].filter(n => $(pre + '-d' + n).checked);
+    if (!titulo){ pmsg('Escribí qué vas a hacer.', 'err'); return; }
+    if (!/^\d{2}:\d{2}$/.test(ini) || !/^\d{2}:\d{2}$/.test(fin) || fin <= ini){ pmsg('La hora de fin tiene que ser después de la de inicio.', 'err'); return; }
+    if (k === 'badd'){
+      const b = {id: uuid(), fecha: f.dataset.f, titulo: titulo.slice(0, 120), hora_inicio: ini, hora_fin: fin, completado: false, dias_semana: dias, creado_en: iso()};
+      M.blocks.push(b); bForm = null; render();
+      mDo(() => sb.from('plan_blocks').insert({id: b.id, fecha: b.fecha, titulo: b.titulo, hora_inicio: ini, hora_fin: fin, dias_semana: dias}));
+      pmsg(dias.length ? `Agregado. Se repite: ${dias.map(n => DIAS3[n - 1]).join(', ')}.` : 'Agregado al plan.', 'ok');
+    } else {
+      const b = M.blocks.find(x => x.id === f.dataset.id); if (!b) return;
+      const patch = {titulo: titulo.slice(0, 120), hora_inicio: ini, hora_fin: fin, dias_semana: dias};
+      Object.assign(b, patch); bForm = null; render();
+      mDo(() => sb.from('plan_blocks').update(patch).eq('id', b.id));
+      pmsg('Guardado.', 'ok');
+    }
+    return;
+  }
+  if (k === 'hnew'){
+    const nm = $('hn-new').value.trim(); if (!nm) return;
+    $('hn-new').value = '';
+    hNew(nm, +$('hm-new').value || 7);
+    pmsg(`Sumé "${nm}". Aparece en tu lista desde la próxima que arme tu socio.`, 'ok');
+  }
+});
+// Arrastrar tareas entre días (compu)
+document.addEventListener('dragstart', e => {
+  const li = e.target.closest && e.target.closest('[data-tid]');
+  if (!li || page !== 'tareas') return;
+  dragId = li.dataset.tid; li.classList.add('drag');
+  try { e.dataTransfer.setData('text/plain', dragId); e.dataTransfer.effectAllowed = 'move'; } catch (err) {}
+});
+document.addEventListener('dragend', () => { dragId = null; document.querySelectorAll('.drag,.drop').forEach(x => x.classList.remove('drag', 'drop')); });
+document.addEventListener('dragover', e => {
+  if (!dragId) return;
+  const z = e.target.closest && e.target.closest('[data-dropday]');
+  if (!z) return;
+  e.preventDefault();
+  document.querySelectorAll('.drop').forEach(x => { if (x !== z) x.classList.remove('drop'); });
+  z.classList.add('drop');
+});
+document.addEventListener('drop', e => {
+  if (!dragId) return;
+  const z = e.target.closest && e.target.closest('[data-dropday]');
+  if (!z) return;
+  e.preventDefault();
+  const li = e.target.closest('[data-tid]'), antes = li && li.dataset.tid !== dragId ? li.dataset.tid : null;
+  const id = dragId; dragId = null;
+  const t = taskById(id), f = z.dataset.dropday || null, prev = t ? (t.fecha || null) : null;
+  tMover(id, f, antes);
+  if (prev === f) return;
+  pmsg(f ? `Movida al ${fmtD(f, {weekday: 'long', day: 'numeric'})}.` : 'Movida a sin fecha.', 'ok');
 });
 
 /* ---------- Tu socio: chat en vivo (función "socio" con Claude) ---------- */
@@ -1272,25 +2022,27 @@ $('jvp').addEventListener('click', e => {
 });
 
 /* ---------- App: navegación y pantalla completa ---------- */
-const NAV_IDS = ['sec-top','sec-hab','sec-diet','sec-neg','sec-metas','sec-fin','sec-plata','sec-socio'];
+const NAV_IDS = ['sec-top','sec-diet','sec-neg','sec-metas','sec-fin','sec-plata','sec-socio'];
 document.addEventListener('click', e => {
   const g = e.target.closest('[data-go]');
-  if (g){ const el = $(g.dataset.go); if (el) (g.dataset.go === 'sec-top' ? window.scrollTo({top: 0, behavior: 'smooth'}) : el.scrollIntoView({behavior: 'smooth', block: 'start'})); return; }
+  if (g){ if (page !== 'inicio') setPage('inicio'); const el = $(g.dataset.go); if (el) (g.dataset.go === 'sec-top' ? window.scrollTo({top: 0, behavior: 'smooth'}) : el.scrollIntoView({behavior: 'smooth', block: 'start'})); return; }
 });
 let navTick = false;
 function navActive(){
   navTick = false;
+  document.querySelectorAll('[data-page]').forEach(b => { if (b.classList.contains('nv') || b.classList.contains('tb')) b.classList.toggle('on', b.dataset.page === page); });
+  if (page !== 'inicio'){ document.querySelectorAll('.nv[data-go],.tb[data-go]').forEach(b => b.classList.remove('on')); return; }
   const vis = NAV_IDS.map(id => $(id)).filter(el => el && el.offsetParent !== null);
   let cur = 'sec-top';
   const mid = window.innerHeight * 0.35;
   vis.forEach(el => { if (el.getBoundingClientRect().top <= mid) cur = el.id; });
   if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) cur = 'sec-socio';
-  const tabMap = {'sec-hab':'sec-top','sec-diet':'sec-top','sec-neg':'sec-top','sec-hoy':'sec-top'};
+  const tabMap = {'sec-hab':'sec-top','sec-diet':'sec-top','sec-neg':'sec-top','sec-hoy':'sec-top','sec-metas':'sec-top','sec-fin':'sec-top'};
   document.querySelectorAll('.nv[data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === cur));
   const t = tabMap[cur] || cur;
   document.querySelectorAll('.tb[data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === t));
 }
-window.addEventListener('scroll', () => { if (!navTick){ navTick = true; requestAnimationFrame(navActive); } }, {passive: true});
+window.addEventListener('scroll', () => { if (page !== 'inicio') return; if (!navTick){ navTick = true; requestAnimationFrame(navActive); } }, {passive: true});
 window.addEventListener('resize', navActive);
 navActive();
 
@@ -1467,6 +2219,7 @@ async function startApp(){
   try { await db.load(); }
   catch (e) { loaded.e = loaded.t = loaded.m = loaded.p = true; render(); msg('No se pudieron traer tus datos. Revisá la conexión.', 'err'); }
   db.listen();
+  mLoad().then(() => mListen());
   avEstado();
 }
 
@@ -1512,8 +2265,9 @@ $('login-form').addEventListener('submit', async e => {
   } finally { btn.disabled = false; }
 });
 $('salir').addEventListener('click', async () => { if (sb) await sb.auth.signOut(); location.reload(); });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && db && started) db.load().catch(() => {}); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && db && started){ db.load().catch(() => {}); mLoad(); } });
 
+if (PAGES[location.hash.slice(1)]) setPage(location.hash.slice(1), false);
 render();
 renderJv();
 (async () => {
