@@ -1595,7 +1595,24 @@ async function mLoad(){
   } catch (e) { console.error(e); M.err = true; }
   render();
 }
-function mRender(){ if (mRaf) return; mRaf = requestAnimationFrame(() => { mRaf = 0; render(); }); }
+// Si estás escribiendo o dictando en un campo, no rehago la pantalla por cambios que llegan del servidor
+// (rehacerla cortaba el micrófono del teclado del celu): espero a que salgas del campo.
+let mPend = false;
+const escribiendo = () => { const a = document.activeElement; return !!a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && /^(text|search|email|url|tel|number)$/.test(a.type || 'text'))); };
+function mRender(){
+  if (mRaf) return;
+  if (escribiendo()){
+    if (!mPend){ mPend = true; document.activeElement.addEventListener('blur', () => { mPend = false; setTimeout(mRender, 60); }, {once: true}); }
+    return;
+  }
+  mRaf = requestAnimationFrame(() => { mRaf = 0; render(); });
+}
+// Cambio de día con la app abierta (el celu la deja abierta de un día para el otro): recargo todo,
+// así Dieta, Tareas y Hábitos no se quedan con la fecha de ayer.
+const diaApp = today();
+function cambioDeDia(){ if (today() !== diaApp && !escribiendo()) location.reload(); }
+setInterval(cambioDeDia, 60e3);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') cambioDeDia(); });
 function mListen(){
   if (mChan) sb.removeChannel(mChan);
   const up = (arr, r) => { const i = arr.findIndex(x => x.id === r.id); if (r.eliminado){ if (i >= 0) arr.splice(i, 1); } else if (i >= 0) Object.assign(arr[i], r); else arr.push(r); };
@@ -2569,7 +2586,7 @@ function dComidasHtml(){
     <form class="dform" data-dform="comer" autocomplete="off">
       <textarea id="d-texto" rows="2" maxlength="2000" placeholder="Contame qué comiste. Ej: almuerzo 200 de pollo y 300 de papa · con foto: comí el 60%, más 80 g de pan" aria-label="Qué comiste"></textarea>
       ${dFotoUrl ? `<div class="dpv"><img src="${dFotoUrl}" alt="Foto de la comida"><span>Foto lista. Aclarale arriba lo que no se vea (cuánto comiste, qué más sumaste).</span><button class="x" type="button" data-dfotox aria-label="Quitar foto">×</button></div>` : ''}
-      <div class="drow"><button class="btn" type="submit"${dBusy ? ' disabled' : ''}>${dBusy ? 'Calculando…' : 'Registrar'}</button><label class="btn soft dfile">Foto<input type="file" accept="image/*" data-dfoto hidden></label>${gs.map(g => `<button class="btn ghost sm" type="button" data-dguard="${esc(g.key)}">${esc(g.nombre)}</button>`).join('')}</div>
+      <div class="drow"><button class="btn" type="submit"${dBusy ? ' disabled' : ''}>${dBusy ? 'Calculando…' : dDia === today() ? 'Registrar' : 'Registrar en el ' + esc(fmtD(dDia))}</button><label class="btn soft dfile">Foto<input type="file" accept="image/*" data-dfoto hidden></label>${gs.map(g => `<button class="btn ghost sm" type="button" data-dguard="${esc(g.key)}">${esc(g.nombre)}</button>`).join('')}</div>
     </form>
     ${dRecoHtml(f, its.length)}
     ${its.length ? '<span class="lbl">Lo que ya comiste</span>' : ''}${meals}
@@ -3511,15 +3528,15 @@ function subscribeAll(){
   });
   db.collection('plata').onSnapshot(snap => {
     let p = null, g = null; snap.docs.forEach(d => { if (d.id === 'presupuesto') p = d.data(); if (d.id === 'pagos') g = d.data(); });
-    plataDoc = p; plata = p; pagos = g && g.items ? g : {items:{}}; loaded.p = true; render();
+    plataDoc = p; plata = p; pagos = g && g.items ? g : {items:{}}; loaded.p = true; mRender();
   });
   db.collection('cerebro').onSnapshot(snap => {
     let e = null, mn = null, ag = null; snap.docs.forEach(d => { if (d.id === 'estado') e = d.data(); if (d.id === 'socio') socio = d.data(); if (d.id === 'manana') mn = d.data(); if (d.id === 'agenda') ag = d.data(); });
-    estadoRaw = e; mananaRaw = mn; agendaRaw = ag; loaded.e = true; render();
+    estadoRaw = e; mananaRaw = mn; agendaRaw = ag; loaded.e = true; mRender();
   });
   db.collection('ticks').onSnapshot(snap => {
     const all = {}; snap.docs.forEach(d => { all[d.id] = d.data() || {}; });
-    ticksAll = all; loaded.t = true; render();
+    ticksAll = all; loaded.t = true; mRender();
   });
   db.collection('chat').onSnapshot(snap => {
     let h = null; snap.docs.forEach(d => { if (d.id === 'hilo') h = d.data(); });
@@ -3531,15 +3548,15 @@ function subscribeAll(){
   });
   db.collection('dieta').onSnapshot(snap => {
     let c = null; snap.docs.forEach(d => { if (d.id === 'config') c = d.data(); });
-    dietCfg = c; render();
+    dietCfg = c; mRender();
   });
   db.collection('negocio').onSnapshot(snap => {
     let r = null; snap.docs.forEach(d => { if (d.id === 'recos') r = d.data(); });
-    negRecos = r && r.items ? r : {items: {}}; render();
+    negRecos = r && r.items ? r : {items: {}}; mRender();
   });
   db.collection('manual').onSnapshot(snap => {
     let m = null; snap.docs.forEach(d => { if (d.id === 'metas') m = d.data(); });
-    manual = m && typeof m === 'object' ? Object.assign({valores: {}}, m) : {valores: {}}; loaded.m = true; render();
+    manual = m && typeof m === 'object' ? Object.assign({valores: {}}, m) : {valores: {}}; loaded.m = true; mRender();
   });
 }
 
