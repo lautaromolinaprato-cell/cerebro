@@ -160,6 +160,9 @@ input::placeholder{color:var(--ph)}
 
 /* Metas */
 .meta{display:grid;gap:7px;padding:14px 0 0;border-top:1px solid var(--line)}
+/* Metas en blanco y negro (pedido del 24/11: sin rojo ni colores de semáforo) */
+#metas{--good:var(--fg);--good-dim:rgba(var(--fg-rgb),.12);--warn:var(--dim-fg);--warn-dim:rgba(var(--fg-rgb),.08);--bad:var(--muted);--bad-dim:rgba(var(--fg-rgb),.06)}
+#metas .pill.good,#metas .pill.warn,#metas .pill.bad{border-color:rgba(var(--fg-rgb),.22)}
 .meta:first-child{border-top:0;padding-top:0}
 .mh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mt{font-weight:600;font-size:16px;min-width:0}
