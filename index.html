@@ -2220,9 +2220,18 @@ function fNuevoItem(m, sec, data){
 function fArmarMes(m){
   const prev = [...new Set(M.fin.items.filter(i => i.mes < m).map(i => i.mes))].sort().pop();
   if (!prev) return 0;
-  const rows = M.fin.items.filter(i => i.mes === prev && !(['compra', 'venta'].includes(i.seccion) && i.hecho)).map(i => ({
-    id: uuid(), mes: m, seccion: i.seccion, clave: i.clave, nombre: i.nombre, monto: i.monto, hecho: false, vence: i.vence, prioridad: i.prioridad, nota: i.nota, orden: i.orden
-  }));
+  // No copia: compras/ventas ya hechas, pagos únicos (nota "Solo …" o "Pago único…"), la última cuota, ni lo que ya está en el mes nuevo.
+  const ya = new Set(M.fin.items.filter(i => i.mes === m).map(i => i.seccion + '|' + (i.clave || normCat(i.nombre))));
+  const rows = [];
+  for (const i of M.fin.items.filter(i => i.mes === prev)){
+    if (['compra', 'venta'].includes(i.seccion) && i.hecho) continue;
+    if (/^\s*(solo\b|pago [uú]nico)/i.test(i.nota || '')) continue;
+    if (ya.has(i.seccion + '|' + (i.clave || normCat(i.nombre)))) continue;
+    let nombre = i.nombre;
+    const cu = i.seccion === 'tarjeta' && /(\d+)\s*\/\s*(\d+)/.exec(nombre || '');
+    if (cu){ if (+cu[1] >= +cu[2]) continue; nombre = nombre.replace(cu[0], (+cu[1] + 1) + '/' + cu[2]); }
+    rows.push({ id: uuid(), mes: m, seccion: i.seccion, clave: i.clave, nombre, monto: i.monto, hecho: false, vence: i.vence, prioridad: i.prioridad, nota: i.nota, orden: i.orden });
+  }
   rows.forEach(r => M.fin.items.push(r));
   render();
   mDo(() => sb.from('fin_items').insert(rows));
@@ -2312,7 +2321,9 @@ function fResumenHtml(){
   const gastEse = c.ese.reduce((s, e) => s + gastadoCat(m, e.nombre), 0);
   const ventas = finItems(m, 'venta'), vendible = sumM(ventas.filter(v => !v.hecho)), vendido = sumM(ventas.filter(v => v.hecho));
   const compras = finItems(m, 'compra'), pendC = sumM(compras.filter(x => !x.hecho));
-  const top = `<section class="panel fq">
+  const prevA = !c.hay && [...new Set(M.fin.items.filter(i => i.mes < m).map(i => i.mes))].sort().pop();
+  const armar = prevA ? `<section class="panel"><p class="empty">${esc(mesLabel(m))} todavía no tiene ingresos ni fijos.</p><button class="btn" type="button" data-farmar="${m}">Armar ${esc(capi(fmtD(m + '-01', {month: 'long'})))} con lo de ${esc(fmtD(prevA + '-01', {month: 'long'}))}</button></section>` : '';
+  const top = armar + `<section class="panel fq">
     <div class="ph"><h2>Me queda</h2><span class="lbl">${m === hoyM ? 'Para gastar este mes' : esc(mesLabel(m))}</span></div>
     <div class="fqbig num ${c.queda < 0 ? 'neg' : ''}">${money(c.queda)}</div>
     <div class="fcas">

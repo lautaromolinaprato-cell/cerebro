@@ -1,5 +1,5 @@
 // Cerebro: primero la red (siempre la versión nueva); si no hay conexión, lo último guardado.
-const CACHE = 'cerebro-v9';
+const CACHE = 'cerebro-v10';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
