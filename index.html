@@ -2505,7 +2505,9 @@ function dInsertarGuardadas(f, keys, forzar){
   const its = dGuardadaItems(keys);
   if (!its.length) return null;
   let orden = dItems(f).reduce((m, i) => Math.max(m, i.orden ?? 0), -1) + 1;
-  const rows = its.map(r => ({id: uuid(), fecha: f, comida: forzar ? mealOf(forzar) : mealOf(r.comida), alimento: r.alimento, cantidad: r.cantidad || null, kcal: Math.round(+r.kcal || 0), p: +r.p || 0, c: +r.c || 0, g: +r.g || 0, orden: orden++, origen: 'guardada', creado_en: iso()}));
+  // Lo que no trae comida (ej. "Mi salsa") va con la comida que se carga junto, o con la de la hora
+  const h = new Date().getHours(), base = (its.find(r => r.comida) || {}).comida || (h < 11 ? 'Desayuno' : h < 16 ? 'Almuerzo' : h < 19 ? 'Merienda' : 'Cena');
+  const rows = its.map(r => ({id: uuid(), fecha: f, comida: forzar ? mealOf(forzar) : mealOf(r.comida || base), alimento: r.alimento, cantidad: r.cantidad || null, kcal: Math.round(+r.kcal || 0), p: +r.p || 0, c: +r.c || 0, g: +r.g || 0, orden: orden++, origen: 'guardada', creado_en: iso()}));
   rows.forEach(r => M.diet.items.push(r));
   dRecoNull(f);
   render();
