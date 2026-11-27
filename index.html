@@ -199,6 +199,16 @@ input::placeholder{color:var(--ph)}
 .fin .fp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
 .fin .bar{height:5px}
 .fin .fnote{font-size:13px;color:var(--warn)}
+.fin-sub{display:flex;align-items:baseline;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.fin-sub h3{margin:0}
+.fin-sub .lbl{margin-left:auto}
+.fin.done .d{border-color:var(--line);background:transparent}
+.fin.done .d b{color:var(--fg)}
+.fin.done.np .d b{color:var(--muted)}
+.fin .fr{display:flex;gap:10px;align-items:baseline;font-size:13px;color:var(--muted)}
+.fin .fr .linkb{margin-left:0;font-size:13px}
+.fin .inl{margin-top:2px}
+.fin-sub + .fins .fin:first-child{padding-top:10px}
 
 /* Semana */
 .habs{display:grid;gap:9px}
@@ -1278,13 +1288,20 @@ function renderMetas(){
   }).join('') + `<div class="xtra">${nueva}</div>`;
 }
 
+// Un final está rendido si tu socio lo marcó (rendido: true) o si ya pasó su fecha.
+const finKey = f => String(f.titulo || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const finRendido = (f, t0) => !!f.rendido || dayN(f.fecha) < t0;
+const calTxt = c => c == null || c === '' ? '' : String(c).replace('.', ',');
+let editFin = null;
 function renderFinales(){
   const box = $('finales');
   const t0 = dayN(today());
-  const fs = (estado && Array.isArray(estado.finales)) ? estado.finales.filter(f => f && f.fecha && dayN(f.fecha) >= t0).sort((a,b) => dayN(a.fecha) - dayN(b.fecha)) : [];
+  const all = (estado && Array.isArray(estado.finales)) ? estado.finales.filter(f => f && f.fecha && f.titulo) : [];
+  const fs = all.filter(f => !finRendido(f, t0)).sort((a,b) => dayN(a.fecha) - dayN(b.fecha));
+  const rs = all.filter(f => finRendido(f, t0)).sort((a,b) => dayN(a.fecha) - dayN(b.fecha));
   $('fin-cnt').textContent = estado && estado.finales ? `${fs.length} por rendir` : '';
-  if (!fs.length){ box.innerHTML = `<p class="empty">${loaded.e ? 'No quedan finales cargados.' : 'Cargando finales…'}</p>`; return; }
-  box.innerHTML = fs.map(f => {
+  if (!all.length){ box.innerHTML = `<p class="empty">${loaded.e ? 'No hay finales cargados.' : 'Cargando finales…'}</p>`; return; }
+  const prox = fs.length ? fs.map(f => {
     const n = dayN(f.fecha) - t0, cls = n <= 2 ? ' now' : n <= 7 ? ' soon' : '';
     const tot = +f.prep_total || 0, hec = +f.prep_hechas || 0, p = tot ? hec/tot : 0;
     const big = n === 0 ? 'HOY' : n;
@@ -1293,7 +1310,13 @@ function renderFinales(){
     const tone = !tot ? '' : p >= 1 ? 'good' : falta > n ? 'bad' : falta > n*.6 ? 'warn' : 'good';
     const w = Math.max(Math.round(p*100), tone === 'bad' ? 3 : 0);
     return `<div class="fin${cls}"><div class="d"><b class="num">${big}</b><span>${small}</span></div><div class="ft"><div class="fn"><b>${esc(f.titulo)}</b>${f.oral ? '<span class="chip">Oral</span>' : ''}<span>${esc(fmtD(f.fecha, {weekday:'short', day:'numeric', month:'short'}))}</span></div>${tot ? `<div class="fp"><div class="bar ${tone}"><i style="width:${w}%"></i></div><span class="num det">${hec}/${tot} días de estudio</span></div>` : ''}${f.nota ? `<span class="fnote clamp2 det">${esc(f.nota)}</span>` : ''}</div></div>`;
-  }).join('');
+  }).join('') : '<p class="empty">No quedan finales por rendir.</p>';
+  const hechos = rs.length ? `<div class="fin-sub"><h3>Ya rendidos</h3><span class="lbl num">${rs.length} de ${all.length}</span></div><div class="fins">${rs.map(f => {
+    const k = finKey(f), c = calTxt(f.calificacion);
+    const form = editFin === k ? `<form class="inl" data-form="fin-nota" data-k="${esc(k)}"><input id="fin-cal" type="text" inputmode="decimal" maxlength="5" placeholder="8" aria-label="Nota de ${esc(f.titulo)}" value="${esc(c)}" autocomplete="off"><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-fin-cancel>Cancelar</button></form>` : '';
+    return `<div class="fin done${c ? '' : ' np'}"><div class="d"><b class="num">${c ? esc(c) : '–'}</b><span>nota</span></div><div class="ft"><div class="fn"><b>${esc(f.titulo)}</b>${f.oral ? '<span class="chip">Oral</span>' : ''}<span>${esc(fmtD(f.fecha, {weekday:'short', day:'numeric', month:'short'}))}</span></div><div class="fr">${c ? '' : '<span>Nota pendiente</span>'}${editFin === k ? '' : `<button class="linkb" type="button" data-fin-nota="${esc(k)}">${c ? 'Cambiar nota' : 'Poner nota'}</button>`}</div>${form}</div></div>`;
+  }).join('')}</div>` : '';
+  box.innerHTML = prox + hechos;
 }
 
 function renderSemana(){
@@ -1406,6 +1429,9 @@ document.addEventListener('click', e => {
   const mvb = e.target.closest('[data-mov]');
   if (mvb){ movRef = movRef === mvb.dataset.mov ? null : mvb.dataset.mov; openRef = null; render(); setTimeout(() => { const i = $('mv-h'); if (i) i.focus(); }, 30); return; }
   if (e.target.closest('[data-cancel-meta]')){ editMeta = null; render(); return; }
+  const fnb = e.target.closest('[data-fin-nota]');
+  if (fnb){ editFin = fnb.dataset.finNota; renderFinales(); setTimeout(() => { const i = $('fin-cal'); if (i){ i.focus(); i.select(); } }, 30); return; }
+  if (e.target.closest('[data-fin-cancel]')){ editFin = null; renderFinales(); return; }
   const siempre = e.target.closest('[data-siempre]');
   if (siempre){
     const f = siempre.closest('form'), ref = f.dataset.ref, comida = mealOf(ref.slice(7)), key = comida.toLowerCase();
@@ -1507,6 +1533,23 @@ document.addEventListener('submit', e => {
       dBusy = false; openRef = null; setTick(ref, true, `${t} · ${nf(sm.kcal)} kcal`);
       msg(`Anotado: ${nf(sm.kcal)} kcal · ${nf(sm.p)}P ${nf(sm.c)}C ${nf(sm.g)}G.`, 'ok');
     }).catch(er => { dBusy = false; const b2 = document.querySelector('form[data-form=comida] button[type=submit]'); if (b2){ b2.disabled = false; b2.textContent = 'Guardar'; } msg(dErr(er), 'err'); });
+    return;
+  }
+  if (f.dataset.form === 'fin-nota'){
+    if (!db){ pmsg('No se puede guardar desde esta vista.', 'err'); return; }
+    const k = f.dataset.k, raw = $('fin-cal').value.trim().replace(/\s/g, '');
+    let cal = null;
+    if (raw){
+      const n = parseFloat(raw.replace(',', '.'));
+      if (isNaN(n) || n < 0 || n > 10){ pmsg('Poné una nota del 0 al 10.', 'err'); return; }
+      cal = Math.round(n * 100) / 100;
+    }
+    const aplicar = d => { d = d && typeof d === 'object' ? d : {}; for (const x of (Array.isArray(d.finales) ? d.finales : [])) if (finKey(x) === k){ x.rendido = true; if (cal == null) delete x.calificacion; else x.calificacion = cal; x.calificacion_en = iso(); } return d; };
+    if (estado) aplicar(estado);
+    editFin = null; renderFinales();
+    writeChain = writeChain.then(() => db.doc('cerebro/estado').mutate(aplicar))
+      .then(() => pmsg(cal == null ? 'Nota borrada.' : `Nota guardada: ${calTxt(cal)}.`, 'ok'))
+      .catch(() => pmsg('No se pudo guardar la nota.', 'err'));
     return;
   }
   if (f.dataset.form === 'meta'){
@@ -2929,7 +2972,7 @@ function rDato(k){
     }
     if (k === 'trabajo_finanzas'){ const c = finCalc(today().slice(0, 7)); return c.hay ? `Te queda ${money(c.queda)} este mes` : ''; }
     if (k === 'educativa_cultural'){
-      const f = ((estado && estado.finales) || []).filter(x => x.fecha >= today()).sort((a, b) => a.fecha.localeCompare(b.fecha))[0];
+      const f = ((estado && estado.finales) || []).filter(x => x.fecha >= today() && !x.rendido).sort((a, b) => a.fecha.localeCompare(b.fecha))[0];
       if (!f) return '';
       const d = dayN(f.fecha) - dayN(today());
       return `${f.titulo}: ${d === 0 ? 'hoy' : d === 1 ? 'mañana' : 'en ' + d + ' días'}`;
