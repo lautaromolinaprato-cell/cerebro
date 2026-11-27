@@ -6,7 +6,7 @@
 <title>Cerebro</title>
 <script>
 (function(){
-  var h = new Date().getHours(), th = (h >= 6 && h < 18) ? 'light' : 'dark';
+  var d = new Date(), mi = d.getHours() * 60 + d.getMinutes(), th = (mi >= 360 && mi < 1170) ? 'light' : 'dark'; // claro de 6:00 a 19:29
   document.documentElement.setAttribute('data-theme', th);
   var m1 = document.createElement('meta'); m1.name = 'theme-color'; m1.id = 'meta-theme'; m1.content = th === 'light' ? '#F4F4F4' : '#000000';
   var m2 = document.createElement('meta'); m2.name = 'apple-mobile-web-app-status-bar-style'; m2.content = th === 'light' ? 'default' : 'black-translucent';
@@ -3447,9 +3447,9 @@ function navActive(){
 }
 navActive();
 
-/* ---------- Modo claro de 6 a 18 h, oscuro el resto ---------- */
+/* ---------- Modo claro de 6:00 a 19:29, oscuro desde las 19:30 (pedido de Lauti, 27/11) ---------- */
 function applyTheme(){
-  const h = new Date().getHours(), th = (h >= 6 && h < 18) ? 'light' : 'dark';
+  const d = new Date(), mi = d.getHours() * 60 + d.getMinutes(), th = (mi >= 360 && mi < 1170) ? 'light' : 'dark';
   if (document.documentElement.getAttribute('data-theme') === th) return;
   document.documentElement.setAttribute('data-theme', th);
   const m = document.getElementById('meta-theme'); if (m) m.content = th === 'light' ? '#F4F4F4' : '#000000';
